@@ -1,5 +1,5 @@
 # ClowniSH 🤡 
-A silly shell
+A silly shell (WIP)
 
 ## Dependencies
 * [libnn](https://github.com/nniemeir/libnn)
