@@ -1,9 +1,6 @@
 # ClowniSH 🤡 
 A silly shell (WIP)
 
-## Dependencies
-* [libnn](https://github.com/nniemeir/libnn)
-
 ## Usage
 ```
 clownish [OPTIONS]
@@ -12,7 +9,6 @@ clownish [OPTIONS]
 ### Options
 ```
 -h                      Display program usage
--l                      Save program output to file
 ```
 
 ## License

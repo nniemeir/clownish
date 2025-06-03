@@ -1,4 +1,4 @@
-SRC = src/main.c
+SRC = src/main.c src/launch.c src/parse.c
 
 NAME = clownish
 
@@ -25,8 +25,6 @@ CC = gcc
 OBJS=	$(SRC:.c=.o)
 
 CFLAGS = -Wall -Wextra -pedantic -g -I./include
-
-LDFLAGS = -lnn
 
 all: $(NAME)
 
