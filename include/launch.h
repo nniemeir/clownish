@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <wait.h>
 
-int launch(char **args, int *args_count);
-int launch_builtin(char **args, int *receiving);
+int exec(char **args, int *args_count);
+int exec_builtin(char **args, int *receiving);
 
 #endif

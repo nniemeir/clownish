@@ -1,6 +1,30 @@
 #include "../include/launch.h"
 
-int launch(char **args, int *args_count) {
+// Returns -1 on error, 0 on no match, 1 on match
+int exec_builtin(char **args, int *receiving) {
+  if (strcmp(args[0], "help") == 0) {
+    printf("cd - change directory\n");
+    printf("exit - exit shell\n");
+    printf("help - display this message\n");
+    return 1;
+  }
+  if (strcmp(args[0], "exit") == 0) {
+    *receiving = 0;
+    return 1;
+  }
+  if (strcmp(args[0], "cd") == 0) {
+    if (!args[1]) {
+      args[1] = getenv("HOME");
+    }
+    if (chdir(args[1]) == -1) {
+      printf("clownish: cd encountered an error.");
+    }
+    return 1;
+  }
+  return 0;
+}
+
+int exec(char **args, int *args_count) {
   pid_t pid;
   int status;
   pid = fork();
@@ -41,32 +65,5 @@ int launch(char **args, int *args_count) {
     dup2(copy_out, fileno(stdout));
     close(copy_out);
   }
-  return 0;
-}
-
-// Returns -1 on error, 0 on no match, 1 on match
-int launch_builtin(char **args, int *receiving) {
-  if (strcmp(args[0], "help") == 0) {
-    printf("cd - change directory\n");
-    printf("exit - exit shell\n");
-    printf("help - display this message\n");
-    return 1;
-  }
-
-  if (strcmp(args[0], "exit") == 0) {
-    *receiving = 0;
-    return 1;
-  }
-
-  if (strcmp(args[0], "cd") == 0) {
-    if (!args[1]) {
-      args[1] = getenv("HOME");
-    }
-    if (chdir(args[1]) == -1) {
-      printf("clownish: cd encountered an error.");
-    }
-    return 1;
-  }
-
   return 0;
 }

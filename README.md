@@ -1,5 +1,5 @@
 # ClowniSH 🤡 
-A silly shell (WIP)
+A silly shell
 
 ## Usage
 ```
@@ -9,6 +9,7 @@ clownish [OPTIONS]
 ### Options
 ```
 -h                      Display program usage
+-l                      Save program output to file
 ```
 
 ## License

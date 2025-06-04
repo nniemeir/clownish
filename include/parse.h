@@ -6,5 +6,5 @@
 #define TOKEN_BUFFER_SIZE 64
 #define TOKEN_DELIM " \t\r\n\a"
 
-char **split_input(char *line, int *args_count);
+char **tokenize_input(char *line, int *args_count);
 #endif
