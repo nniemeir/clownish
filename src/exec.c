@@ -1,23 +1,23 @@
-#include "../include/launch.h"
+#include "../include/exec.h"
 
 // Returns -1 on error, 0 on no match, 1 on match
 int exec_builtin(char **args, int *receiving) {
-  if (strcmp(args[0], "help") == 0) {
-    printf("cd - change directory\n");
-    printf("exit - exit shell\n");
-    printf("help - display this message\n");
+  if (strcmp(args[0], "baffled") == 0) {
+    printf("mosey - change directory\n");
+    printf("scram - exit shell\n");
+    printf("baffled - display this message\n");
     return 1;
   }
-  if (strcmp(args[0], "exit") == 0) {
+  if (strcmp(args[0], "scram") == 0) {
     *receiving = 0;
     return 1;
   }
-  if (strcmp(args[0], "cd") == 0) {
+  if (strcmp(args[0], "mosey") == 0) {
     if (!args[1]) {
       args[1] = getenv("HOME");
     }
     if (chdir(args[1]) == -1) {
-      printf("clownish: cd encountered an error.");
+      perror("clowniSH");
     }
     return 1;
   }
@@ -42,13 +42,13 @@ int exec(char **args, int *args_count) {
     dup2(fd, fileno(stdout));
     args[*args_count - 1] = NULL;
   }
+  // Child process
   if (pid == 0) {
-    // Child process
     if (background) {
       setpgid(0, 0);
     }
     if (execvp(args[0], args) == -1) {
-      printf("clowniSH: Failed to execute child process.\n");
+      printf("clowniSH: Program not found.\n");
     }
     if (fd != -2) {
       dup2(copy_out, fileno(stdout));

@@ -1,6 +1,5 @@
 #ifndef MAIN_H
 #include <fcntl.h>
-#include <libnn.h>
 #include <linux/limits.h>
 #include <stdbool.h>
 #include <stdio.h>
