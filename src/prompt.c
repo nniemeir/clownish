@@ -1,8 +1,5 @@
 #include "../include/prompt.h"
 #include "../include/parse.h"
-#define WHT "\x1b[37m"
-#define BLU "\x1b[33m"
-#define RED "\x1b[31m"
 
 int construct_prompt(char **prompt) {
   char *username = getlogin();
@@ -19,7 +16,7 @@ int construct_prompt(char **prompt) {
   }
   char *tcompressed_cwd = replace(cwd, getenv("HOME"), "~");
   snprintf(*prompt, PROMPT_MAX, "%s[%s@%s] %s%s%s ", RED, username, hostname,
-           BLU, tcompressed_cwd, WHT);
+           YEL, tcompressed_cwd, WHT);
   free(tcompressed_cwd);
   return 0;
 }
