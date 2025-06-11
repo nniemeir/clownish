@@ -24,7 +24,8 @@ int exec_builtin(char **args, int *receiving) {
   return 0;
 }
 
-int exec(char **args, int *args_count) {
+int exec(char **args, struct stream_info *current_stream_info,
+         int is_background_process) {
   pid_t pid;
   int status;
   pid = fork();
@@ -32,19 +33,17 @@ int exec(char **args, int *args_count) {
     printf("clowniSH: Failed to fork process.\n");
     return 1;
   }
-  int background = 0;
   int fd = -2;
   int copy_out;
-  if (strcmp(args[*args_count - 1], "&") == 0) {
-    background = 1;
-    fd = open("/dev/null", O_WRONLY);
+  if (current_stream_info->name[0] != '\0') {
+    fd = open(current_stream_info->name,
+              O_WRONLY | current_stream_info->type | O_CREAT, 0667);
     copy_out = dup(fileno(stdout));
     dup2(fd, fileno(stdout));
-    args[*args_count - 1] = NULL;
   }
   // Child process
   if (pid == 0) {
-    if (background) {
+    if (is_background_process) {
       setpgid(0, 0);
     }
     if (execvp(args[0], args) == -1) {
@@ -56,7 +55,7 @@ int exec(char **args, int *args_count) {
     }
     return 0;
   }
-  if (pid > 0 && !background) {
+  if (pid > 0 && !is_background_process) {
     do {
       waitpid(pid, &status, WUNTRACED);
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));

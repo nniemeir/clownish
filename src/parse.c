@@ -30,6 +30,15 @@ char *replace(const char *original_str, const char *original_substr,
   return new_str;
 }
 
+int check_if_background(char *input) {
+  size_t len = strlen(input);
+  if (len >= 2 && strcmp(input + len - 2, " &") == 0) {
+    input[len - 2] = '\0';
+    return 1;
+  }
+  return 0;
+}
+
 char *parse_envs(const char *input) {
   char *output = malloc(PROMPT_MAX);
   if (!output) {

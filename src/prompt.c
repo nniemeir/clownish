@@ -1,5 +1,7 @@
 #include "../include/prompt.h"
+#include "../include/history.h"
 #include "../include/parse.h"
+#include "../include/stream.h"
 
 int construct_prompt(char **prompt) {
   char *username = getlogin();
@@ -21,7 +23,9 @@ int construct_prompt(char **prompt) {
   return 0;
 }
 
-int prompt_loop(char ***args, char **input, int *args_count) {
+int prompt_loop(char ***args, char **input, int *args_count,
+                int *is_background_process,
+                struct stream_info *current_stream_info) {
   char *prompt = malloc(PROMPT_MAX);
   if (!prompt) {
     printf("clowniSH: Failed to allocate memory for prompt.\n");
@@ -37,6 +41,11 @@ int prompt_loop(char ***args, char **input, int *args_count) {
     return 0;
   }
   add_history(*input);
+  *is_background_process = check_if_background(*input);
+  if (!determine_stream(*input, current_stream_info)) {
+    printf("clowniSH: Failed to determine output stream.\n");
+  }
+
   char *tilde_expanded = replace(*input, "~", getenv("HOME"));
   if (!tilde_expanded) {
     return 0;

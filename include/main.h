@@ -1,4 +1,5 @@
 #ifndef MAIN_H
+#define MAIN_H
 #include <fcntl.h>
 #include <linux/limits.h>
 #include <stdbool.h>

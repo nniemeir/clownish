@@ -1,4 +1,5 @@
 #ifndef PARSE_H
+#define PARSE_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,4 +13,5 @@ char *replace(const char *original_str, const char *original_substr,
               const char *new_substr);
 char *parse_envs(const char *input);
 char **tokenize_input(char *line, int *args_count);
+int check_if_background(char *input);
 #endif
