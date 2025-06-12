@@ -11,7 +11,7 @@
 #define RED "\x1b[31m"
 
 int prompt_loop(char ***args, char **input, int *args_count,
-                int *is_background_process,
-                struct stream_info *current_stream_info);
+                char **parsed_str_buffer, int *is_background_process,
+                struct stream_info *current_stream_info, char *home_dir);
 
 #endif

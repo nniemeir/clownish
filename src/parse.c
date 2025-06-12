@@ -39,14 +39,10 @@ int check_if_background(char *input) {
   return 0;
 }
 
-char *parse_envs(const char *input) {
-  char *output = malloc(PROMPT_MAX);
-  if (!output) {
-    return NULL;
-  }
-  strcpy(output, input);
+int parse_envs(const char *input, char **parsed_str_buffer) {
+  strcpy(*parsed_str_buffer, input);
   char temp[PROMPT_MAX];
-  char *start = output;
+  char *start = *parsed_str_buffer;
   while ((start = strstr(start, "$")) != NULL) {
     char var_name[ARG_MAX];
     int i = 0;
@@ -57,17 +53,19 @@ char *parse_envs(const char *input) {
     var_name[i] = '\0';
     char *env_value = getenv(var_name);
     if (!env_value) {
+      fprintf(stderr, "clowniSH: Failed to resolve %s.\n", var_name);
       env_value = "";
     }
-    strncpy(temp, output, start - output - i - NULL_TERMINATOR_LENGTH);
-    temp[start - output - i - NULL_TERMINATOR_LENGTH] = '\0';
+    strncpy(temp, *parsed_str_buffer,
+            start - *parsed_str_buffer - i - NULL_TERMINATOR_LENGTH);
+    temp[start - *parsed_str_buffer - i - NULL_TERMINATOR_LENGTH] = '\0';
     strcat(temp, env_value);
     strcat(temp, start);
 
-    strcpy(output, temp);
-    start = output;
+    strcpy(*parsed_str_buffer, temp);
+    start = *parsed_str_buffer;
   }
-  return output;
+  return 1;
 }
 
 char **tokenize_input(char *line, int *args_count) {

@@ -1,6 +1,8 @@
 #include "../include/main.h"
 #include "../include/exec.h"
 #include "../include/history.h"
+#include "../include/home.h"
+#include "../include/parse.h"
 #include "../include/prompt.h"
 #include "../include/stream.h"
 
@@ -27,7 +29,11 @@ void process_args(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
   process_args(argc, argv);
-  char *hist_file = init_history();
+  char *home_dir = init_home_dir();
+  if (!init_home_dir()) {
+    exit(EXIT_FAILURE);
+  }
+  char *hist_file = init_history(home_dir);
   if (!hist_file) {
     exit(EXIT_FAILURE);
   }
@@ -39,43 +45,52 @@ int main(int argc, char *argv[]) {
         malloc(sizeof(struct stream_info));
     int args_count = 0;
     int is_background_process = 0;
-    if (prompt_loop(&args, &input, &args_count, &is_background_process,
-                    current_stream_info)) {
+    char *parsed_str_buffer = malloc(PROMPT_MAX);
+    if (!parsed_str_buffer) {
+      return 0;
+    }
+    if (prompt_loop(&args, &input, &args_count, &parsed_str_buffer,
+                    &is_background_process, current_stream_info, home_dir)) {
       free(hist_file);
       free(input);
       free(args);
+      free(parsed_str_buffer);
       exit(EXIT_FAILURE);
     }
     if (input[0] == '\0') {
       free(input);
+      free(parsed_str_buffer);
       continue;
     }
-    int command_is_builtin =
-        exec_builtin(args, &receiving);
+    int command_is_builtin = exec_builtin(args, &receiving, home_dir);
     switch (command_is_builtin) {
     case -1:
       printf("clowniSH: Failed to execute built-in command.\n");
       free(hist_file);
       free(current_stream_info);
       free(input);
+      free(parsed_str_buffer);
       free(args);
       exit(EXIT_FAILURE);
     case 1:
       free(input);
       free(current_stream_info);
       free(args);
+      free(parsed_str_buffer);
       continue;
     }
     if (exec(args, current_stream_info, is_background_process) == 1) {
       printf("clowniSH: Failed to execute command.\n");
       free(hist_file);
       free(current_stream_info);
+      free(parsed_str_buffer);
       free(input);
       free(args);
       continue;
     }
     free(input);
     free(args);
+    free(parsed_str_buffer);
     free(current_stream_info);
   }
   close_history(hist_file);

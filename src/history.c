@@ -1,11 +1,6 @@
 #include "../include/history.h"
 
-char *init_history() {
-  char *home_dir = getenv("HOME");
-  if (!home_dir) {
-    printf("clowniSH: Failed to resolve $HOME.\n");
-    return NULL;
-  }
+char *init_history(char *home_dir) {
   char *hist_file = malloc(PATH_MAX);
   snprintf(hist_file, PATH_MAX, "%s/.scribbles", home_dir);
   using_history();

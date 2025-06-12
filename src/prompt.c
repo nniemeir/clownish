@@ -3,7 +3,7 @@
 #include "../include/parse.h"
 #include "../include/stream.h"
 
-int construct_prompt(char **prompt) {
+int construct_prompt(char **prompt, char *home_dir) {
   char *username = getlogin();
   if (!username) {
     printf("clowniSH: Failed to get username.\n");
@@ -16,7 +16,7 @@ int construct_prompt(char **prompt) {
     printf("clowniSH: Failed to get current working directory.\n");
     return 1;
   }
-  char *tcompressed_cwd = replace(cwd, getenv("HOME"), "~");
+  char *tcompressed_cwd = replace(cwd, home_dir, "~");
   snprintf(*prompt, PROMPT_MAX, "%s[%s@%s] %s%s%s ", RED, username, hostname,
            YEL, tcompressed_cwd, WHT);
   free(tcompressed_cwd);
@@ -24,14 +24,14 @@ int construct_prompt(char **prompt) {
 }
 
 int prompt_loop(char ***args, char **input, int *args_count,
-                int *is_background_process,
-                struct stream_info *current_stream_info) {
+                char **parsed_str_buffer, int *is_background_process,
+                struct stream_info *current_stream_info, char *home_dir) {
   char *prompt = malloc(PROMPT_MAX);
   if (!prompt) {
     printf("clowniSH: Failed to allocate memory for prompt.\n");
     return 1;
   }
-  if (construct_prompt(&prompt) == 1) {
+  if (construct_prompt(&prompt, home_dir) == 1) {
     printf("clowniSH: Failed to construct prompt, using default.\n");
     strcpy(prompt, "clowniSH$ ");
   }
@@ -45,15 +45,16 @@ int prompt_loop(char ***args, char **input, int *args_count,
   if (!determine_stream(*input, current_stream_info)) {
     printf("clowniSH: Failed to determine output stream.\n");
   }
-
-  char *tilde_expanded = replace(*input, "~", getenv("HOME"));
+  char *tilde_expanded = replace(*input, "~",home_dir);
   if (!tilde_expanded) {
     return 0;
   }
-  char *envs_parsed = parse_envs(tilde_expanded);
+  if (!parse_envs(tilde_expanded, parsed_str_buffer)) {
+    return 0;
+  }
   free(tilde_expanded);
   *args_count = 0;
-  *args = tokenize_input(envs_parsed, args_count);
+  *args = tokenize_input(*parsed_str_buffer, args_count);
   if (!*args[0]) {
     return 1;
   }

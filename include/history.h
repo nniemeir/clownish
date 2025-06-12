@@ -5,6 +5,6 @@
 #include <stdlib.h>
 #include <readline/history.h>
 
-char *init_history();
+char *init_history(char *home_dir);
 void close_history(char *hist_file);
 #endif

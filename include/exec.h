@@ -9,6 +9,5 @@
 #include <wait.h>
 int exec(char **args, struct stream_info *current_stream_info,
          int is_background_process);
-int exec_builtin(char **args, int *receiving);
-
+int exec_builtin(char **args, int *receiving, char *home_dir);
 #endif

@@ -1,7 +1,7 @@
 #include "../include/exec.h"
 
 // Returns -1 on error, 0 on no match, 1 on match
-int exec_builtin(char **args, int *receiving) {
+int exec_builtin(char **args, int *receiving, char *home_dir) {
   if (strcmp(args[0], "baffled") == 0) {
     printf("mosey - change directory\n");
     printf("scram - exit shell\n");
@@ -14,7 +14,7 @@ int exec_builtin(char **args, int *receiving) {
   }
   if (strcmp(args[0], "mosey") == 0) {
     if (!args[1]) {
-      args[1] = getenv("HOME");
+      args[1] = home_dir;
     }
     if (chdir(args[1]) == -1) {
       perror("clowniSH");
@@ -37,7 +37,7 @@ int exec(char **args, struct stream_info *current_stream_info,
   int copy_out;
   if (current_stream_info->name[0] != '\0') {
     fd = open(current_stream_info->name,
-              O_WRONLY | current_stream_info->type | O_CREAT, 0667);
+              O_WRONLY | current_stream_info->type | O_CREAT, 0644);
     copy_out = dup(fileno(stdout));
     dup2(fd, fileno(stdout));
   }
