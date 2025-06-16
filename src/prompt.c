@@ -23,39 +23,37 @@ int construct_prompt(char **prompt, char *home_dir) {
   return 0;
 }
 
-int prompt_loop(char ***args, char **input, int *args_count,
-                char **parsed_str_buffer, int *is_background_process,
-                struct stream_info *current_stream_info, char *home_dir) {
+int prompt_loop(struct repl_ctx *current_ctx) {
   char *prompt = malloc(PROMPT_MAX);
   if (!prompt) {
     printf("clowniSH: Failed to allocate memory for prompt.\n");
     return 1;
   }
-  if (construct_prompt(&prompt, home_dir) == 1) {
+  if (construct_prompt(&prompt, current_ctx->home_dir) == 1) {
     printf("clowniSH: Failed to construct prompt, using default.\n");
     strcpy(prompt, "clowniSH$ ");
   }
-  *input = readline(prompt);
+  current_ctx->input = readline(prompt);
   free(prompt);
-  if (!input || *input[0] == '\0') {
+  if (!current_ctx->input || current_ctx->input[0] == '\0') {
     return 0;
   }
-  add_history(*input);
-  *is_background_process = check_if_background(*input);
-  if (!determine_stream(*input, current_stream_info)) {
+  add_history(current_ctx->input);
+  current_ctx->is_background_process = check_if_background(current_ctx->input);
+  if (!determine_stream(current_ctx)) {
     printf("clowniSH: Failed to determine output stream.\n");
   }
-  char *tilde_expanded = replace(*input, "~",home_dir);
+  char *tilde_expanded = replace(current_ctx->input, "~",current_ctx->home_dir);
   if (!tilde_expanded) {
     return 0;
   }
-  if (!parse_envs(tilde_expanded, parsed_str_buffer)) {
+  if (!parse_envs(tilde_expanded, &current_ctx->parsed_str)) {
     return 0;
   }
   free(tilde_expanded);
-  *args_count = 0;
-  *args = tokenize_input(*parsed_str_buffer, args_count);
-  if (!*args[0]) {
+  current_ctx->args_count = 0;
+  current_ctx->args = tokenize_input(current_ctx->parsed_str, &current_ctx->args_count);
+  if (!current_ctx->args[0]) {
     return 1;
   }
   return 0;

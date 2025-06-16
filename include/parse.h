@@ -12,6 +12,6 @@
 char *replace(const char *original_str, const char *original_substr,
               const char *new_substr);
 int parse_envs(const char *input, char **parsed_str_buffer);
-char **tokenize_input(char *line, int *args_count);
+char **tokenize_input(char *line, unsigned int *args_count);
 int check_if_background(char *input);
 #endif

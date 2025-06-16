@@ -7,7 +7,5 @@
 #include <string.h>
 #include <unistd.h>
 #include <wait.h>
-int exec(char **args, struct stream_info *current_stream_info,
-         int is_background_process);
-int exec_builtin(char **args, int *receiving, char *home_dir);
+int exec(struct repl_ctx *current_ctx, int *receiving);
 #endif

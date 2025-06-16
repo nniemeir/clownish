@@ -68,7 +68,7 @@ int parse_envs(const char *input, char **parsed_str_buffer) {
   return 1;
 }
 
-char **tokenize_input(char *line, int *args_count) {
+char **tokenize_input(char *line, unsigned int *args_count) {
   int buffer_size = BUFFER_SIZE;
   char **tokens = malloc(buffer_size * sizeof(char *));
   char *token;
@@ -80,7 +80,7 @@ char **tokenize_input(char *line, int *args_count) {
   while (token) {
     tokens[*args_count] = token;
     (*args_count)++;
-    if (*args_count >= buffer_size) {
+    if (*args_count >= (unsigned int)buffer_size) {
       buffer_size += BUFFER_SIZE;
       tokens = realloc(tokens, buffer_size * sizeof(char *));
       if (!tokens) {

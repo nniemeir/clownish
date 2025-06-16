@@ -4,11 +4,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct stream_info {
-  char name[256];
-  int type;
+struct repl_ctx {
+  char *home_dir;
+  char *input;
+  char *parsed_str;
+  char **args;
+  unsigned int args_count;
+  int is_background_process;
+  char stream_name[256];
+  int stream_type;
 };
 
-int determine_stream(char *input, struct stream_info *current_stream_info);
+int determine_stream(struct repl_ctx *current_ctx);
 
 #endif
