@@ -1,4 +1,4 @@
-SRC = src/tease.c src/main.c src/exec.c src/history.c src/home.c src/stream.c src/parse.c src/prompt.c
+SRC = src/exec.c src/history.c src/home.c src/main.c src/parse.c src/prompt.c src/tease.c
 
 NAME = clownish
 

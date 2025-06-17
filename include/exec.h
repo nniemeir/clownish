@@ -1,6 +1,6 @@
 #ifndef EXEC_H
 #define EXEC_H
-#include "../include/stream.h"
+#include "../include/parse.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>

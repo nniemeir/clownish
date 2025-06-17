@@ -1,7 +1,6 @@
 #include "../include/prompt.h"
 #include "../include/history.h"
 #include "../include/parse.h"
-#include "../include/stream.h"
 
 int construct_prompt(char **prompt, char *home_dir) {
   char *username = getlogin();
@@ -11,15 +10,15 @@ int construct_prompt(char **prompt, char *home_dir) {
   }
   char hostname[_SC_HOST_NAME_MAX];
   gethostname(hostname, _SC_HOST_NAME_MAX);
-  char cwd[PATH_MAX];
-  if (!getcwd(cwd, sizeof(cwd))) {
-    printf("clowniSH: Failed to get current working directory.\n");
+  char *cwd = malloc(PATH_MAX);
+  if (!getcwd(cwd, PATH_MAX)) {
+    perror("clowniSH: ");
     return 1;
   }
-  char *tcompressed_cwd = replace(cwd, home_dir, "~");
+  replace(&cwd, home_dir, "~");
   snprintf(*prompt, PROMPT_MAX, "%s[%s@%s] %s%s%s ", RED, username, hostname,
-           YEL, tcompressed_cwd, WHT);
-  free(tcompressed_cwd);
+           YEL, cwd, WHT);
+  free(cwd);
   return 0;
 }
 
@@ -39,22 +38,19 @@ int prompt_loop(struct repl_ctx *current_ctx) {
     return 0;
   }
   add_history(current_ctx->input);
-  current_ctx->is_background_process = check_if_background(current_ctx->input);
-  if (!determine_out_stream(current_ctx)) {
-    printf("clowniSH: Failed to determine output stream.\n");
-  }
-  char *tilde_expanded = replace(current_ctx->input, "~",current_ctx->home_dir);
-  if (!tilde_expanded) {
-    return 0;
-  }
-  if (!parse_envs(tilde_expanded, &current_ctx->parsed_str)) {
-    return 0;
-  }
-  free(tilde_expanded);
   current_ctx->args_count = 0;
-  current_ctx->args = tokenize_input(current_ctx->parsed_str, &current_ctx->args_count);
+  current_ctx->args =
+      tokenize_input(current_ctx->input, &current_ctx->args_count);
   if (!current_ctx->args[0]) {
     return 1;
+  }
+  check_if_background(current_ctx);
+  determine_out_stream(current_ctx);
+  for (unsigned int i = 0; i < current_ctx->args_count; i++) {
+    replace(&current_ctx->args[i], "~", current_ctx->home_dir);
+    if (!parse_envs(&current_ctx->args[i])) {
+      printf("clowniSH: Failed to parse environment variables.\n");
+    }
   }
   return 0;
 }

@@ -1,21 +1,40 @@
 #include "../include/parse.h"
 #include "../include/prompt.h"
 
-char *replace(const char *original_str, const char *original_substr,
-              const char *new_substr) {
+void remove_arg(char **args, unsigned int *args_count, unsigned int arg_index) {
+  if (arg_index >= *args_count) {
+    fprintf(stderr, "clowniSH: Invalid index passed to remove_arg.\n");
+    return;
+  }
+  if (arg_index == 0) {
+    fprintf(stderr,
+            "clowniSH: Removing command name from args is forbidden.\n");
+    return;
+  }
+  for (unsigned int i = arg_index; i < *args_count - 1; i++) {
+    args[i] = args[i + 1];
+  }
+  args[*args_count - 1] = NULL;
+  (*args_count)--;
+  return;
+}
+
+void replace(char **original_str, const char *original_substr,
+             const char *new_substr) {
   int original_len = strlen(original_substr), new_len = strlen(new_substr);
   int count = 0;
-  for (const char *temp = original_str; (temp = strstr(temp, original_substr));
+  for (const char *temp = *original_str; (temp = strstr(temp, original_substr));
        temp += original_len) {
     count++;
   }
-  int new_str_len = strlen(original_str) + count * (new_len - original_len) + 1;
+  int new_str_len =
+      strlen(*original_str) + count * (new_len - original_len) + 1;
   char *new_str = malloc(new_str_len);
   if (!new_str) {
     fprintf(stderr, "clowniSH: Failed to allocate memory for new_str.\n");
-    return NULL;
+    return;
   }
-  const char *src = original_str;
+  const char *src = *original_str;
   char *dst = new_str;
   while (*src) {
     if (!strncmp(src, original_substr, original_len)) {
@@ -27,23 +46,47 @@ char *replace(const char *original_str, const char *original_substr,
     }
   }
   *dst = '\0';
-  return new_str;
+  strcpy(*original_str, new_str);
+  free(new_str);
 }
 
-int check_if_background(char *input) {
-  size_t len = strlen(input);
-  if (len >= 2 && strcmp(input + len - 2, " &") == 0) {
-    input[len - 2] = '\0';
-    return 1;
+void check_if_background(struct repl_ctx *current_ctx) {
+  if (strcmp(current_ctx->args[current_ctx->args_count - 1], "&") == 0) {
+    current_ctx->is_background_process = 1;
+    remove_arg(current_ctx->args, &current_ctx->args_count,
+               current_ctx->args_count - 1);
   }
-  return 0;
 }
 
-int parse_envs(const char *input, char **parsed_str_buffer) {
-  strcpy(*parsed_str_buffer, input);
-  char temp[PROMPT_MAX];
-  char *start = *parsed_str_buffer;
-  while ((start = strstr(start, "$")) != NULL) {
+void determine_out_stream(struct repl_ctx *current_ctx) {
+  current_ctx->out_stream_type = 0;
+  strcpy(current_ctx->out_stream_name, "");
+  char *gt;
+  char *two_gt;
+  for (unsigned int i = 0; i < current_ctx->args_count; i++) {
+    gt = strstr(current_ctx->args[i], ">");
+    if (gt) {
+      current_ctx->out_stream_type = O_WRONLY;
+      strcpy(current_ctx->out_stream_name, current_ctx->args[i + 1]);
+      // Called twice to remove gt and the stream name
+      remove_arg(current_ctx->args, &current_ctx->args_count, i);
+      remove_arg(current_ctx->args, &current_ctx->args_count, i);
+      return;
+    }
+    two_gt = strstr(current_ctx->args[i], ">>");
+    if (two_gt) {
+      current_ctx->out_stream_type = O_APPEND;
+      strcpy(current_ctx->out_stream_name, current_ctx->args[i + 1]);
+      remove_arg(current_ctx->args, &current_ctx->args_count, i);
+      remove_arg(current_ctx->args, &current_ctx->args_count, i);
+      return;
+    }
+  }
+}
+
+int parse_envs(char **arg) {
+  char *start = *arg;
+  if (strstr(start, "$")) {
     char var_name[ARG_MAX];
     int i = 0;
     start++;
@@ -56,14 +99,7 @@ int parse_envs(const char *input, char **parsed_str_buffer) {
       fprintf(stderr, "clowniSH: Failed to resolve %s.\n", var_name);
       env_value = "";
     }
-    strncpy(temp, *parsed_str_buffer,
-            start - *parsed_str_buffer - i - NULL_TERMINATOR_LENGTH);
-    temp[start - *parsed_str_buffer - i - NULL_TERMINATOR_LENGTH] = '\0';
-    strcat(temp, env_value);
-    strcat(temp, start);
-
-    strcpy(*parsed_str_buffer, temp);
-    start = *parsed_str_buffer;
+    *arg = env_value;
   }
   return 1;
 }

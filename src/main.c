@@ -4,7 +4,6 @@
 #include "../include/home.h"
 #include "../include/parse.h"
 #include "../include/prompt.h"
-#include "../include/stream.h"
 #include "../include/tease.h"
 
 void process_args(int argc, char *argv[]) {

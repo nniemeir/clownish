@@ -1,6 +1,6 @@
 #ifndef TEASE_H
 #define TEASE_H
-#include "../include/stream.h"
+#include "../include/parse.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
