@@ -53,9 +53,9 @@ int exec(struct repl_ctx *current_ctx, int *receiving) {
   }
   int fd = -2;
   int copy_out;
-  if (current_ctx->stream_name[0] != '\0') {
-    fd = open(current_ctx->stream_name,
-              O_WRONLY | current_ctx->stream_type | O_CREAT, 0644);
+  if (current_ctx->out_stream_name[0] != '\0') {
+    fd = open(current_ctx->out_stream_name,
+              O_WRONLY | current_ctx->out_stream_type | O_CREAT, 0644);
     copy_out = dup(fileno(stdout));
     dup2(fd, fileno(stdout));
   }

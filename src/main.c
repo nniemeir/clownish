@@ -5,17 +5,22 @@
 #include "../include/parse.h"
 #include "../include/prompt.h"
 #include "../include/stream.h"
+#include "../include/tease.h"
 
 void process_args(int argc, char *argv[]) {
   int c;
-  while ((c = getopt(argc, argv, "hv")) != -1) {
+  while ((c = getopt(argc, argv, "hpv")) != -1) {
     switch (c) {
     case 'h':
       printf("Usage: clownish [options]\n");
       printf("Options:\n");
       printf("  -h               Show this help message\n");
+      printf("  -p               Enable polite mode\n");
       printf("  -v               Show version info\n");
       exit(EXIT_SUCCESS);
+    case 'p':
+      teasing_enabled = 0;
+      break;
     case 'v':
       printf("clowniSH Pre-Alpha\n");
       exit(EXIT_SUCCESS);
@@ -41,6 +46,9 @@ void cleanup_ctx(struct repl_ctx *current_ctx) {
 
 int main(int argc, char *argv[]) {
   process_args(argc, argv);
+  if (teasing_enabled) {
+    tease_terminal();
+  }
   struct repl_ctx current_ctx;
   current_ctx.home_dir = init_home_dir();
   if (!current_ctx.home_dir) {
@@ -67,6 +75,13 @@ int main(int argc, char *argv[]) {
     if (current_ctx.input[0] == '\0') {
       cleanup_ctx(&current_ctx);
       continue;
+    }
+    if (program_is_blacklisted(current_ctx.args[0])) {
+      cleanup_ctx(&current_ctx);
+      continue;
+    }
+    if (teasing_enabled) {
+      tease_program(current_ctx.args[0]);
     }
     if (exec(&current_ctx, &receiving) == 1) {
       printf("clowniSH: Failed to execute command.\n");

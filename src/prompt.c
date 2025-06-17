@@ -40,7 +40,7 @@ int prompt_loop(struct repl_ctx *current_ctx) {
   }
   add_history(current_ctx->input);
   current_ctx->is_background_process = check_if_background(current_ctx->input);
-  if (!determine_stream(current_ctx)) {
+  if (!determine_out_stream(current_ctx)) {
     printf("clowniSH: Failed to determine output stream.\n");
   }
   char *tilde_expanded = replace(current_ctx->input, "~",current_ctx->home_dir);

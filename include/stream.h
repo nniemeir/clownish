@@ -11,10 +11,12 @@ struct repl_ctx {
   char **args;
   unsigned int args_count;
   int is_background_process;
-  char stream_name[256];
-  int stream_type;
+  char in_stream_name[256];
+  int in_stream_type;
+  char out_stream_name[256];
+  int out_stream_type;
 };
 
-int determine_stream(struct repl_ctx *current_ctx);
+int determine_out_stream(struct repl_ctx *current_ctx);
 
 #endif
