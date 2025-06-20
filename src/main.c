@@ -6,6 +6,10 @@
 #include "../include/prompt.h"
 #include "../include/tease.h"
 
+void handler(int signal_num) {
+  write(STDOUT_FILENO, "\n", 2);
+}
+
 void process_args(int argc, char *argv[]) {
   int c;
   while ((c = getopt(argc, argv, "hpv")) != -1) {
@@ -32,61 +36,69 @@ void process_args(int argc, char *argv[]) {
 }
 
 void cleanup_ctx(struct repl_ctx *current_ctx) {
-  if (current_ctx->input) {
-    free(current_ctx->input);
-  }
-  if (current_ctx->args) {
+  // Allocation of args only occurs if the string is not empty
+  if (current_ctx->input[0] != '\0') {
     free(current_ctx->args);
   }
-  if (current_ctx->parsed_str) {
-    free(current_ctx->parsed_str);
+  if (current_ctx->input) {
+    free(current_ctx->input);
   }
 }
 
 int main(int argc, char *argv[]) {
   process_args(argc, argv);
+
   if (teasing_enabled) {
     tease_terminal();
   }
+
   struct repl_ctx current_ctx;
   current_ctx.home_dir = init_home_dir();
   if (!current_ctx.home_dir) {
     exit(EXIT_FAILURE);
   }
+
   char *hist_file = init_history(current_ctx.home_dir);
   if (!hist_file) {
     exit(EXIT_FAILURE);
   }
-  int receiving = 1;
+
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_handler = handler;
+  sigaction(SIGINT, &sa, NULL);
+
+  srand(time(NULL));
+
+  current_ctx.receiving = 1;
   current_ctx.input = NULL;
-  while (receiving) {
-    current_ctx.args_count = 0;
-    current_ctx.is_background_process = 0;
-    current_ctx.parsed_str = malloc(PROMPT_MAX);
-    if (!current_ctx.parsed_str) {
-      return 0;
-    }
+  while (current_ctx.receiving) {
     if (prompt_loop(&current_ctx)) {
       cleanup_ctx(&current_ctx);
       close_history(hist_file);
       exit(EXIT_FAILURE);
     }
+
     if (current_ctx.input[0] == '\0') {
       cleanup_ctx(&current_ctx);
       continue;
     }
+
     if (program_is_blacklisted(current_ctx.args[0])) {
       cleanup_ctx(&current_ctx);
       continue;
     }
-    if (teasing_enabled) {
-      tease_program(current_ctx.args[0]);
-    }
-    if (exec(&current_ctx, &receiving) == 1) {
+
+    if (exec(&current_ctx) == 1) {
       printf("clowniSH: Failed to execute command.\n");
       cleanup_ctx(&current_ctx);
       continue;
     }
+
+    if (teasing_enabled) {
+      tease_program(current_ctx.args[0]);
+    }
+
     cleanup_ctx(&current_ctx);
   }
   close_history(hist_file);
