@@ -35,12 +35,18 @@ int program_is_blacklisted(const char *program_name) {
 
 void tease_program(const char *program_name) {
   static const struct joke known_programs[NUM_OF_KNOWN_PROGRAMS] = {
-      {"bleachbit", "PLACEHOLDER."},  {"code", "PLACEHOLDER."},
-      {"discord", "PLACEHOLDER"},     {"firefox", "PLACEHOLDER"},
-      {"gimp", "PLACEHOLDER"},        {"handbrake", "PLACEHOLDER"},
-      {"nvim", "PLACEHOLDER"},        {"ranger", "PLACEHOLDER"},
-      {"steam", "PLACEHOLDER"},       {"thunar", "PLACEHOLDER"},
-      {"thunderbird", "PLACEHOLDER"}, {"wireshark", "PLACEHOLDER"}};
+      {"bleachbit", "Pray that your email server isn't being audited."},
+      {"code", "EEE, MICROSOFT BAD."},
+      {"discord", "Make sure to enable application privacy before doing any independent research."},
+      {"firefox", "The ship is sinking my friend."},
+      {"gimp", "Do you miss Adobe yet?"},
+      {"handbrake", "I hope this is all legitimately acquired media."},
+      {"nvim", "Did Brodie or the Primeagen send you?"},
+      {"ranger", "Ah I see, commands are just too hard for you."},
+      {"steam", "Your To-Do list isn't getting any smaller"},
+      {"thunar", "Are you too good for the CLI now?"},
+      {"wireshark",
+       "Why bother? You don't understand any of the packet fields anyway."}};
 
   unsigned int lower_bound = 0;
   unsigned int upper_bound = NUM_OF_KNOWN_PROGRAMS - 1;
