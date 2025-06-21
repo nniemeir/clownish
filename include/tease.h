@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define NUM_OF_BLACKLISTED_PROGRAMS 2
+#define NUM_OF_BLACKLISTED_PROGRAMS 3
 #define NUM_OF_KNOWN_PROGRAMS 14
 #define NUM_OF_KNOWN_TERMINALS 2
 
@@ -17,6 +17,7 @@ struct joke {
 
 extern int teasing_enabled;
 
+void tease_kernel(void);
 void tease_terminal(void);
 int program_is_blacklisted(const char *program_name);
 void tease_program(const char *program_name);

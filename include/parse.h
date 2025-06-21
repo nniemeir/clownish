@@ -17,6 +17,7 @@
 
 struct repl_ctx {
   char *home_dir;
+  char *user;
   int receiving;
   char *input;
   char **args;

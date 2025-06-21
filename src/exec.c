@@ -11,6 +11,7 @@ int cat(struct repl_ctx *current_ctx) {
     printf(" /\\_/\\\n");
     printf("( o.o )\n");
     printf(" > ^ <\n");
+    printf("You requested my presence %s?\n", current_ctx->user);
     return 1;
   }
   return 0;
@@ -23,7 +24,7 @@ int cd(struct repl_ctx *current_ctx) {
 
   if (chdir(current_ctx->args[1]) == -1) {
     perror("clowniSH");
-    return -1;
+    printf("...likely %s's fault.\n", current_ctx->user);
   }
 
   return 1;
@@ -31,6 +32,17 @@ int cd(struct repl_ctx *current_ctx) {
 
 int exit_builtin(struct repl_ctx *current_ctx) {
   current_ctx->receiving = 0;
+  printf("Finally giving up, %s?\n", current_ctx->user);
+  return 1;
+}
+
+int cler(struct repl_ctx *current_ctx) {
+  if (!teasing_enabled) {
+    return 0;
+  }
+  printf("clowniSH: Program not found. Perhaps you meant to type clear but made a typo in your haste, let's take a breather for a moment.\n");
+  sleep(10);
+  printf("Don't you feel better %s?\n", current_ctx->user);
   return 1;
 }
 
@@ -41,14 +53,14 @@ int help(struct repl_ctx *current_ctx) {
     printf("help - display this message\n");
     return 1;
   }
-  printf("You aren't seriously asking me to hold your hand, are you?\n");
+  printf("You aren't seriously asking me to hold your hand, are you %s?\n", current_ctx->user);
   return 1;
 }
 
 // Returns -1 on error, 0 on no match, 1 on match
 int exec_builtin(struct repl_ctx *current_ctx) {
   static const struct command_associations built_ins[NUM_OF_BUILTINS] = {
-      {"cat", cat}, {"cd", cd}, {"exit", exit_builtin}, {"help", help}};
+      {"cat", cat}, {"cd", cd}, {"cler", cler}, {"exit", exit_builtin}, {"help", help}};
   for (int i = 0; i < NUM_OF_BUILTINS; i++) {
     if (strcmp(current_ctx->args[0], built_ins[i].command_name) == 0) {
       return built_ins[i].command_function(current_ctx);

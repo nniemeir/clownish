@@ -1,14 +1,12 @@
 #include "../include/main.h"
+#include "../include/envs.h"
 #include "../include/exec.h"
 #include "../include/history.h"
-#include "../include/home.h"
 #include "../include/parse.h"
 #include "../include/prompt.h"
 #include "../include/tease.h"
 
-void handler(int signal_num) {
-  write(STDOUT_FILENO, "\n", 2);
-}
+void handler(int signal_num) { write(STDOUT_FILENO, "\n", 2); }
 
 void process_args(int argc, char *argv[]) {
   int c;
@@ -49,6 +47,7 @@ int main(int argc, char *argv[]) {
   process_args(argc, argv);
 
   if (teasing_enabled) {
+    tease_kernel();
     tease_terminal();
   }
 
@@ -57,6 +56,8 @@ int main(int argc, char *argv[]) {
   if (!current_ctx.home_dir) {
     exit(EXIT_FAILURE);
   }
+
+  current_ctx.user = init_user();
 
   char *hist_file = init_history(current_ctx.home_dir);
   if (!hist_file) {

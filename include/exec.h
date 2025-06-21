@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <wait.h>
 
-#define NUM_OF_BUILTINS 4
+#define NUM_OF_BUILTINS 5
 
 struct command_associations {
   char command_name[255];
