@@ -24,7 +24,7 @@ CC = gcc
 
 OBJS=	$(SRC:.c=.o)
 
-CFLAGS = -Wall -Wextra -pedantic -g -I./include
+CFLAGS = -Wall -Wextra -pedantic -g -I include
 
 LDFLAGS = -lreadline
 

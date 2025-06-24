@@ -1,7 +1,29 @@
-#include "../include/tease.h"
-#include <sys/utsname.h>
+#include "tease.h"
 
 int teasing_enabled = 1;
+
+void tease_desktop(void) {
+  char *desktop = getenv("XDG_CURRENT_DESKTOP");
+  static const struct joke known_desktops[NUM_OF_KNOWN_DESKTOPS] = {
+      {"cinnamon", "PLACEHOLDER"},
+      {"deepin", "PLACEHOLDER"},
+      {"ENLIGHTMENT", "PLACEHOLDER"},
+      {"gnome", "PLACEHOLDER"},
+      {"GNOME-Flashback", "PLACEHOLDER"},
+      {"kde", "PLACEHOLDER"},
+      {"MATE", "PLACEHOLDER"},
+      {"sway", "You just can't let go of i3, can you?"},
+      {"Unity", "PLACEHOLDER"},
+      {"X-Cinnamon", "PLACEHOLDER"},
+      {"xfce", "PLACEHOLDER"}};
+
+  for (int i = 0; i < NUM_OF_KNOWN_DESKTOPS; i++) {
+    if (strcmp(desktop, known_desktops[i].name) == 0) {
+      printf("%s\n", known_desktops[i].comment);
+      return;
+    }
+  }
+}
 
 void tease_kernel(void) {
   struct utsname buffer;
@@ -45,7 +67,10 @@ void tease_terminal(void) {
 
 int program_is_blacklisted(const char *program_name) {
   static const struct joke blacklisted_programs[NUM_OF_BLACKLISTED_PROGRAMS] = {
-      {"emacs", "No, use vim."}, {"neofetch", "Do we really need another minimalist cyberpunk anime girl tiling WM rice?"}, {"surf", "Use a real web browser."}};
+      {"emacs", "No, use vim."},
+      {"neofetch", "Do we really need another minimalist cyberpunk anime "
+                   "girl tiling WM rice?"},
+      {"surf", "Use a real web browser."}};
 
   for (int i = 0; i < NUM_OF_BLACKLISTED_PROGRAMS; i++) {
     if (strcmp(program_name, blacklisted_programs[i].name) == 0) {

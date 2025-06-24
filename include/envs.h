@@ -5,6 +5,6 @@
 #include <stdlib.h>
 
 char *init_home_dir(void);
-char *init_user(void);
+char *get_env_s(char *env, char *fallback_value);
 
 #endif

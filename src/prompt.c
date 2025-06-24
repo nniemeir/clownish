@@ -1,5 +1,5 @@
-#include "../include/prompt.h"
-#include "../include/parse.h"
+#include "prompt.h"
+#include "parse.h"
 
 int construct_prompt(char **prompt, char *home_dir) {
   char *username = getlogin();
@@ -47,7 +47,7 @@ int prompt_loop(struct repl_ctx *current_ctx) {
   add_history(current_ctx->input);
 
   current_ctx->args_count = 0;
-  
+
   current_ctx->args =
       tokenize_input(current_ctx->input, &current_ctx->args_count);
   if (!current_ctx->args[0]) {
@@ -56,7 +56,7 @@ int prompt_loop(struct repl_ctx *current_ctx) {
 
   check_if_background(current_ctx);
   determine_out_stream(current_ctx);
-  
+
   for (unsigned int i = 0; i < current_ctx->args_count; i++) {
     replace(&current_ctx->args[i], "~", current_ctx->home_dir);
     if (!parse_envs(&current_ctx->args[i])) {

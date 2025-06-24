@@ -1,4 +1,4 @@
-#include "../include/envs.h"
+#include "envs.h"
 
 char *init_home_dir(void) {
   char *home_dir = getenv("HOME");
@@ -9,11 +9,12 @@ char *init_home_dir(void) {
   return home_dir;
 }
 
-char *init_user(void) {
-  char *user = getenv("USER");
-  if (!user) {
-    fprintf(stderr, "clowniSH: Failed to resolve USER. I'll just call you Keith.\n");
-    user = "keith";
+char *get_env_s(char *env, char *fallback_value) {
+  char *env_value = getenv(env);
+  if (!env_value) {
+    fprintf(stderr, "I failed to resolve %s, so I'll just assume it is %s.\n",
+            env, fallback_value);
+    env_value = env;
   }
-  return user;
+  return env_value;
 }

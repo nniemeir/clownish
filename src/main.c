@@ -1,10 +1,10 @@
-#include "../include/main.h"
-#include "../include/envs.h"
-#include "../include/exec.h"
-#include "../include/history.h"
-#include "../include/parse.h"
-#include "../include/prompt.h"
-#include "../include/tease.h"
+#include "main.h"
+#include "envs.h"
+#include "exec.h"
+#include "history.h"
+#include "parse.h"
+#include "prompt.h"
+#include "tease.h"
 
 void handler(int signal_num) { write(STDOUT_FILENO, "\n", 2); }
 
@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
   if (teasing_enabled) {
     tease_kernel();
     tease_terminal();
+    tease_desktop();
   }
 
   struct repl_ctx current_ctx;
@@ -57,7 +58,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  current_ctx.user = init_user();
+  current_ctx.user = get_env_s("USER", "Keith");
 
   char *hist_file = init_history(current_ctx.home_dir);
   if (!hist_file) {
