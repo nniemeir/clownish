@@ -2,8 +2,15 @@
 
 int teasing_enabled = 1;
 
+static const char *env_fail_msg =
+    "Failed to resolve %s. What on earth are you running?.\n";
+
 void tease_desktop(void) {
   char *desktop = getenv("XDG_CURRENT_DESKTOP");
+  if (!desktop) {
+    fprintf(stderr, env_fail_msg, desktop);
+    return;
+  }
   static const struct joke known_desktops[NUM_OF_KNOWN_DESKTOPS] = {
       {"cinnamon", "PLACEHOLDER"},
       {"deepin", "PLACEHOLDER"},
@@ -50,7 +57,7 @@ void tease_kernel(void) {
 void tease_terminal(void) {
   const char *term = getenv("TERM");
   if (!term) {
-    fprintf(stderr, "clowniSH: Unable to resolve TERM.\n");
+    fprintf(stderr, env_fail_msg, term);
   }
 
   static const struct joke known_terminals[NUM_OF_KNOWN_TERMINALS] = {

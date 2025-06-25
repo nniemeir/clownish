@@ -2,6 +2,10 @@
 
 char *init_history(char *home_dir) {
   char *hist_file = malloc(PATH_MAX);
+  if (!hist_file) {
+    fprintf(stderr, "Malloc failed, take cover!");
+    return NULL;
+  }
   snprintf(hist_file, PATH_MAX, "%s/.scribbles", home_dir);
   using_history();
   read_history(hist_file);

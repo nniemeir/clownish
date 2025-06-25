@@ -1,5 +1,5 @@
-#include "../include/exec.h"
-#include "../include/tease.h"
+#include "exec.h"
+#include "tease.h"
 
 int cat(struct repl_ctx *current_ctx) {
   if (!teasing_enabled) {
@@ -24,7 +24,7 @@ int cd(struct repl_ctx *current_ctx) {
 
   if (chdir(current_ctx->args[1]) == -1) {
     perror("clowniSH");
-    printf("...likely %s's fault.\n", current_ctx->user);
+    fprintf(stderr, "...likely %s's fault.\n", current_ctx->user);
   }
 
   return 1;
@@ -40,7 +40,7 @@ int cler(struct repl_ctx *current_ctx) {
   if (!teasing_enabled) {
     return 0;
   }
-  printf("clowniSH: Program not found. Perhaps you meant to type clear but "
+  fprintf(stderr, "Perhaps you meant to type clear but "
          "made a typo in your haste, let's take a breather for a moment.\n");
   sleep(10);
   printf("Don't you feel better %s?\n", current_ctx->user);
@@ -88,7 +88,7 @@ int exec(struct repl_ctx *current_ctx) {
   int status;
   pid = fork();
   if (pid == -1) {
-    printf("clowniSH: Failed to fork process.\n");
+    fprintf(stderr, "I couldn't fork the process, this is assuredly %s's fault.\n", current_ctx->user);
     return 1;
   }
 
@@ -119,7 +119,7 @@ int exec(struct repl_ctx *current_ctx) {
     }
 
     if (execvp(current_ctx->args[0], current_ctx->args) == -1) {
-      printf("clowniSH: Program not found.\n");
+      fprintf(stderr, "Nope, not seeing that anywhere.\n");
     }
 
     if (fd != -2) {

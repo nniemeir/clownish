@@ -1,13 +1,7 @@
 #include "prompt.h"
 #include "parse.h"
 
-int construct_prompt(char **prompt, char *home_dir) {
-  char *username = getlogin();
-  if (!username) {
-    printf("clowniSH: Failed to get username.\n");
-    return 1;
-  }
-
+int construct_prompt(char **prompt, char *home_dir, char *user) {
   char hostname[_SC_HOST_NAME_MAX];
   gethostname(hostname, _SC_HOST_NAME_MAX);
 
@@ -19,8 +13,8 @@ int construct_prompt(char **prompt, char *home_dir) {
 
   replace(&cwd, home_dir, "~");
 
-  snprintf(*prompt, PROMPT_MAX, "%s[%s@%s] %s%s%s ", RED, username, hostname,
-           YEL, cwd, WHT);
+  snprintf(*prompt, PROMPT_MAX, "%s[%s@%s] %s%s%s ", RED, user, hostname, YEL,
+           cwd, WHT);
 
   free(cwd);
   return 0;
@@ -29,12 +23,12 @@ int construct_prompt(char **prompt, char *home_dir) {
 int prompt_loop(struct repl_ctx *current_ctx) {
   char *prompt = malloc(PROMPT_MAX);
   if (!prompt) {
-    printf("clowniSH: Failed to allocate memory for prompt.\n");
+    fprintf(stderr, "Malloc failed for prompt, take cover!");
     return 1;
   }
 
-  if (construct_prompt(&prompt, current_ctx->home_dir) == 1) {
-    printf("clowniSH: Failed to construct prompt, using default.\n");
+  if (construct_prompt(&prompt, current_ctx->home_dir, current_ctx->user) ==
+      1) {
     strcpy(prompt, "clowniSH$ ");
   }
 
@@ -59,9 +53,7 @@ int prompt_loop(struct repl_ctx *current_ctx) {
 
   for (unsigned int i = 0; i < current_ctx->args_count; i++) {
     replace(&current_ctx->args[i], "~", current_ctx->home_dir);
-    if (!parse_envs(&current_ctx->args[i])) {
-      printf("clowniSH: Failed to parse environment variables.\n");
-    }
+    parse_envs(&current_ctx->args[i]);
   }
   return 0;
 }

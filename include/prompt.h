@@ -12,7 +12,7 @@
 #define YEL "\x1b[33m"
 #define RED "\x1b[31m"
 
-int construct_prompt(char **prompt, char *home_dir);
+int construct_prompt(char **prompt, char *home_dir, char *user);
 int prompt_loop(struct repl_ctx *current_ctx);
 
 #endif

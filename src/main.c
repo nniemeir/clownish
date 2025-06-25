@@ -23,7 +23,7 @@ void process_args(int argc, char *argv[]) {
       teasing_enabled = 0;
       break;
     case 'v':
-      printf("clowniSH Pre-Alpha\n");
+      printf("clowniSH 0.231969420: Malevolent Marlin\n");
       exit(EXIT_SUCCESS);
     case '?':
       fprintf(stderr, "Unknown option '-%c'. Run with -h for options.\n",
@@ -92,7 +92,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (exec(&current_ctx) == 1) {
-      printf("clowniSH: Failed to execute command.\n");
       cleanup_ctx(&current_ctx);
       continue;
     }

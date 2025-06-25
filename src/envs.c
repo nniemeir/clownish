@@ -3,7 +3,7 @@
 char *init_home_dir(void) {
   char *home_dir = getenv("HOME");
   if (!home_dir) {
-    fprintf(stderr, "clowniSH: Failed to resolve HOME.\n");
+    fprintf(stderr, "I failed to resolve HOME, I'm going to take a nap.\n");
     return NULL;
   }
   return home_dir;
