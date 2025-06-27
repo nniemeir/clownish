@@ -1,5 +1,6 @@
 #include "prompt.h"
 #include "parse.h"
+#include "error.h"
 
 int construct_prompt(char **prompt, char *home_dir, char *user) {
   char hostname[_SC_HOST_NAME_MAX];
@@ -23,7 +24,7 @@ int construct_prompt(char **prompt, char *home_dir, char *user) {
 int prompt_loop(struct repl_ctx *current_ctx) {
   char *prompt = malloc(PROMPT_MAX);
   if (!prompt) {
-    fprintf(stderr, "Malloc failed for prompt, take cover!");
+    fprintf(stderr, malloc_fail_msg, "prompt");
     return 1;
   }
 

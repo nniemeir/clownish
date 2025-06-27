@@ -46,12 +46,6 @@ void cleanup_ctx(struct repl_ctx *current_ctx) {
 int main(int argc, char *argv[]) {
   process_args(argc, argv);
 
-  if (teasing_enabled) {
-    tease_kernel();
-    tease_terminal();
-    tease_desktop();
-  }
-
   struct repl_ctx current_ctx;
   current_ctx.home_dir = init_home_dir();
   if (!current_ctx.home_dir) {
@@ -97,9 +91,24 @@ int main(int argc, char *argv[]) {
     }
 
     if (teasing_enabled) {
-      tease_program(current_ctx.args[0]);
+      int rd_num = rand() % (100 - 0 + 1) + 0;
+      if (rd_num <= 25) {
+        tease_program(current_ctx.args[0]);
+        cleanup_ctx(&current_ctx);
+        continue;
+      }
+      if (rd_num <= 50) {
+        tease_kernel();
+        cleanup_ctx(&current_ctx);
+        continue;
+      }
+      if (rd_num <= 75) {
+        tease_terminal();
+        cleanup_ctx(&current_ctx);
+        continue;
+      }
+      tease_desktop();
     }
-
     cleanup_ctx(&current_ctx);
   }
   close_history(hist_file);

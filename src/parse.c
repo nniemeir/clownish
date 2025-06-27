@@ -1,4 +1,5 @@
 #include "parse.h"
+#include "error.h"
 
 void remove_arg(char **args, unsigned int *args_count, unsigned int arg_index) {
   if (arg_index == 0) {
@@ -40,7 +41,7 @@ void replace(char **original_str, const char *original_substr,
 
   char *new_str = malloc(new_str_len);
   if (!new_str) {
-    fprintf(stderr, "Malloc failed for new_str, take cover!");
+    fprintf(stderr, malloc_fail_msg, "new_str");
     return;
   }
 
@@ -110,9 +111,7 @@ int parse_envs(char **arg) {
     var_name[i] = '\0';
     char *env_value = getenv(var_name);
     if (!env_value) {
-      fprintf(stderr,
-              "Failed to resolve %s, You probably forgot to define it.\n",
-              var_name);
+      fprintf(stderr, env_fail_msg, var_name);
       env_value = "";
     }
     *arg = env_value;
@@ -124,7 +123,7 @@ char **tokenize_input(char *line, unsigned int *args_count) {
   int buffer_size = TOKENS_MAX;
   char **tokens = malloc(buffer_size * sizeof(char *));
   if (!tokens) {
-    fprintf(stderr, "Malloc failed for token_buffer, take cover!");
+    fprintf(stderr, malloc_fail_msg, "token buffer");
     return NULL;
   }
 
@@ -140,7 +139,7 @@ char **tokenize_input(char *line, unsigned int *args_count) {
       tokens = realloc(tokens, buffer_size * sizeof(char *));
 
       if (!tokens) {
-        fprintf(stderr, "Malloc failed for token_buffer, take cover!");
+        fprintf(stderr, malloc_fail_msg, "token buffer");
         return NULL;
       }
     }

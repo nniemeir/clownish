@@ -8,9 +8,9 @@
 #include <sys/utsname.h>
 
 #define NUM_OF_BLACKLISTED_PROGRAMS 3
-#define NUM_OF_KNOWN_PROGRAMS 14
+#define NUM_OF_KNOWN_PROGRAMS 96
 #define NUM_OF_KNOWN_TERMINALS 2
-#define NUM_OF_KNOWN_DESKTOPS 11
+#define NUM_OF_KNOWN_DESKTOPS 81
 
 struct joke {
   char name[255];

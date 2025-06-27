@@ -1,5 +1,6 @@
 #include "exec.h"
 #include "tease.h"
+#include "error.h"
 
 int cat(struct repl_ctx *current_ctx) {
   if (!teasing_enabled) {
@@ -24,7 +25,7 @@ int cd(struct repl_ctx *current_ctx) {
 
   if (chdir(current_ctx->args[1]) == -1) {
     perror("clowniSH");
-    fprintf(stderr, "...likely %s's fault.\n", current_ctx->user);
+    fprintf(stderr, blame_user_msg, current_ctx->user);
   }
 
   return 1;
@@ -88,7 +89,7 @@ int exec(struct repl_ctx *current_ctx) {
   int status;
   pid = fork();
   if (pid == -1) {
-    fprintf(stderr, "I couldn't fork the process, this is assuredly %s's fault.\n", current_ctx->user);
+    fprintf(stderr, "I couldn't fork the process.\n");
     return 1;
   }
 
@@ -119,7 +120,7 @@ int exec(struct repl_ctx *current_ctx) {
     }
 
     if (execvp(current_ctx->args[0], current_ctx->args) == -1) {
-      fprintf(stderr, "Nope, not seeing that anywhere.\n");
+      fprintf(stderr, program_not_found_msg);
     }
 
     if (fd != -2) {

@@ -1,9 +1,10 @@
 #include "history.h"
+#include "error.h"
 
 char *init_history(char *home_dir) {
   char *hist_file = malloc(PATH_MAX);
   if (!hist_file) {
-    fprintf(stderr, "Malloc failed, take cover!");
+    fprintf(stderr, malloc_fail_msg, "hist_file");
     return NULL;
   }
   snprintf(hist_file, PATH_MAX, "%s/.scribbles", home_dir);
