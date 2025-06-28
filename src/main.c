@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    if (teasing_enabled) {
+    if (teasing_enabled && current_ctx.args[0][0] != '\0') {
       int rd_num = rand() % (100 - 0 + 1) + 0;
       if (rd_num <= 25) {
         tease_program(current_ctx.args[0]);
