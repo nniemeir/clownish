@@ -1,5 +1,6 @@
 #include "tease.h"
 #include "error.h"
+#include "file.h"
 
 int teasing_enabled = 1;
 
@@ -39,6 +40,119 @@ void joke_binary_search(const struct joke *known_x, unsigned int array_size,
   }
 }
 
+// os-release NAME values sourced from which-distro's collection
+void tease_distro(void) {
+  static int called = 0;
+  if (called == 1) {
+    return;
+  }
+  called = 1;
+  char *os_release = read_file("/etc/os-release");
+  os_release = os_release + 6;
+  char *second_quote = strstr(os_release, "\"");
+  *second_quote = '\0';
+  static const struct joke known_distros[NUM_OF_KNOWN_DISTROS] = {
+      {"AlmaLinux", "PLACEHOLDER"},
+      {"Alpine Linux", "PLACEHOLDER"},
+      {"starter kit", "PLACEHOLDER"},
+      {"Sisyphus", "PLACEHOLDER"},
+      {"Amazon Linux AMI", "PLACEHOLDER"},
+      {"Amazon Linux", "PLACEHOLDER"},
+      {"Arch Linux 32", "PLACEHOLDER"},
+      {"Arch Linux", "PLACEHOLDER"},
+      {"Archcraft", "PLACEHOLDER"},
+      {"ArcoLinux", "PLACEHOLDER"},
+      {"Arkane Linux", "PLACEHOLDER"},
+      {"Artix Linux", "PLACEHOLDER"},
+      {"Aurora", "PLACEHOLDER"},
+      {"Bazzite", "PLACEHOLDER"},
+      {"BlackArch Linux", "PLACEHOLDER"},
+      {"blendOS", "PLACEHOLDER"},
+      {"Bluefin", "PLACEHOLDER"},
+      {"Ubuntu", "PLACEHOLDER"},
+      {"CachyOS Linux", "PLACEHOLDER"},
+      {"CentOS Stream", "PLACEHOLDER"},
+      {"Chimera", "PLACEHOLDER"},
+      {"ChimeraOS", "PLACEHOLDER"},
+      {"Clear Linux OS", "PLACEHOLDER"},
+      {"Debian GNU/Linux", "PLACEHOLDER"},
+      {"Deepin", "PLACEHOLDER"},
+      {"Devuan GNU/Linux", "PLACEHOLDER"},
+      {"Anarchy Linux", "PLACEHOLDER"},
+      {"Antergos Linux", "PLACEHOLDER"},
+      {"CentOS Linux", "PLACEHOLDER"},
+      {"Virtuozzo Linux", "PLACEHOLDER"},
+      {"DragonFly", "PLACEHOLDER"},
+      {"elementary OS", "PLACEHOLDER"},
+      {"EndeavourOS", "PLACEHOLDER"},
+      {"Endless OS", "PLACEHOLDER"},
+      {"EuroLinux", "PLACEHOLDER"},
+      {"Exherbo", "PLACEHOLDER"},
+      {"Fedora Linux", "PLACEHOLDER"},
+      {"Fedora Remix for WSL", "PLACEHOLDER"},
+      {"FreeBSD", "PLACEHOLDER"},
+      {"Funtoo", "PLACEHOLDER"},
+      {"Garuda Linux", "PLACEHOLDER"},
+      {"Gentoo", "PLACEHOLDER"},
+      {"GhostBSD", "PLACEHOLDER"},
+      {"Gnoppix", "PLACEHOLDER"},
+      {"Guix System", "PLACEHOLDER"},
+      {"Hyperbola", "PLACEHOLDER"},
+      {"Kali GNU/Linux", "PLACEHOLDER"},
+      {"KaOS", "PLACEHOLDER"},
+      {"Linux Mint", "PLACEHOLDER"},
+      {"LMDE", "PLACEHOLDER"},
+      {"Mageia", "PLACEHOLDER"},
+      {"Manjaro-ARM", "PLACEHOLDER"},
+      {"Manjaro Linux", "PLACEHOLDER"},
+      {"MIRACLE LINUX", "PLACEHOLDER"},
+      {"KDE neon", "PLACEHOLDER"},
+      {"NI Linux Real-Time", "PLACEHOLDER"},
+      {"NixOS", "PLACEHOLDER"},
+      {"Nobara Linux", "PLACEHOLDER"},
+      {"Oracle Linux Server", "PLACEHOLDER"},
+      {"OmniOS", "PLACEHOLDER"},
+      {"OpenMandriva Lx", "PLACEHOLDER"},
+      {"openSUSE Leap", "PLACEHOLDER"},
+      {"openSUSE Tumbleweed", "PLACEHOLDER"},
+      {"OpenWrt", "PLACEHOLDER"},
+      {"Parrot OS", "PLACEHOLDER"},
+      {"PCLinuxOS", "PLACEHOLDER"},
+      {"Pengwin", "PLACEHOLDER"},
+      {"VMware Photon OS", "PLACEHOLDER"},
+      {"PikaOS", "PLACEHOLDER"},
+      {"PisiLinux", "PLACEHOLDER"},
+      {"Pop!_OS", "PLACEHOLDER"},
+      {"Puppy", "PLACEHOLDER"},
+      {"PureOS", "PLACEHOLDER"},
+      {"Raspbian GNU/Linux", "PLACEHOLDER"},
+      {"RebornOS Linux", "PLACEHOLDER"},
+      {"Redox OS", "PLACEHOLDER"},
+      {"Red Hat Enterprise Linux", "PLACEHOLDER"},
+      {"Rocky Linux", "PLACEHOLDER"},
+      {"Slackware", "PLACEHOLDER"},
+      {"SLED", "PLACEHOLDER"},
+      {"SLES", "PLACEHOLDER"},
+      {"Oracle Solaris", "PLACEHOLDER"},
+      {"Solus", "PLACEHOLDER"},
+      {"SteamOS", "PLACEHOLDER"},
+      {"SystemRescue", "PLACEHOLDER"},
+      {"Tails", "PLACEHOLDER"},
+      {"TencentOS Server", "PLACEHOLDER"},
+      {"TinyCore", "PLACEHOLDER"},
+      {"Trisquel GNU/Linux", "PLACEHOLDER"},
+      {"Ubuntu Kylin", "PLACEHOLDER"},
+      {"Ultramarine Linux", "PLACEHOLDER"},
+      {"Vanilla OS", "PLACEHOLDER"},
+      {"VanillaOS", "PLACEHOLDER"},
+      {"Void", "PLACEHOLDER"},
+      {"Wolfi", "PLACEHOLDER"},
+      {"Zorin OS", "PLACEHOLDER"}};
+  joke_binary_search(known_distros, NUM_OF_KNOWN_DISTROS, os_release);
+  os_release = os_release - 6;
+  free(os_release);
+}
+
 // XDG_CURRENT_DESKTOP has been part of the Desktop Entry Specification since
 // version 1.2 (2017), but is not universally respected (See Sway WM PR #4876)
 void tease_desktop(void) {
@@ -47,7 +161,7 @@ void tease_desktop(void) {
     return;
   }
   called = 1;
-  
+
   char *desktop = getenv("XDG_CURRENT_DESKTOP");
   if (!desktop) {
     fprintf(stderr, env_fail_msg, "XDG_CURRENT_DESKTOP");
@@ -89,7 +203,8 @@ void tease_desktop(void) {
       {"gnome", "How is the search for GNOME extensions that haven't been "
                 "deprecated going?"},
       {"goomwm", "PLACEHOLDER"},
-      {"hackmatrix", "Oh my, a 3D window manager? That must make you so much more productive."},
+      {"hackmatrix", "Oh my, a 3D window manager? That must make you so much "
+                     "more productive."},
       {"herbstluftwm", "PLACEHOLDER"},
       {"hyprland", "Are the fancy animations worth the instability?"},
       {"i3", "I'm sure that manual tiling saves you so much time."},
@@ -111,7 +226,8 @@ void tease_desktop(void) {
       {"moksha", "PLACEHOLDER"},
       {"niri", "PLACEHOLDER"},
       {"notion", "PLACEHOLDER"},
-      {"openbox", "Did you know that some floating WMs actually let you snap windows with your mouse?"},
+      {"openbox", "Did you know that some floating WMs actually let you snap "
+                  "windows with your mouse?"},
       {"orbitiny", "PLACEHOLDER"},
       {"pantheon", "PLACEHOLDER"},
       {"paperde", "PLACEHOLDER"},
@@ -120,10 +236,12 @@ void tease_desktop(void) {
       {"phosh", "PLACEHOLDER"},
       {"plainDE", "PLACEHOLDER"},
       {"qtile", "PLACEHOLDER"},
-      {"ratpoison", "Go on, tell me all about how your WM helps you avoid RSI. I care immensely."},
+      {"ratpoison", "Go on, tell me all about how your WM helps you avoid RSI. "
+                    "I care immensely."},
       {"sawfish", "PLACEHOLDER"},
       {"sowm", "PLACEHOLDER"},
-      {"spectrwm", "You can probably spare more than 20MB of memory for your WM."},
+      {"spectrwm",
+       "You can probably spare more than 20MB of memory for your WM."},
       {"stumpwm", "PLACEHOLDER"},
       {"sugar", "PLACEHOLDER"},
       {"sway", "You just can't let go of i3, can you?"}, // CONFIRMED
@@ -233,7 +351,8 @@ void tease_program(const char *program_name) {
       {"conky", "PLACEHOLDER"},
       {"cron", "PLACEHOLDER"},
       {"curl", "PLACEHOLDER"},
-      {"discord", "Make sure to enable application privacy before doing any independent research."},
+      {"discord", "Make sure to enable application privacy before doing any "
+                  "independent research."},
       {"dmenu", "PLACEHOLDER"},
       {"docker", "PLACEHOLDER"},
       {"ed", "PLACEHOLDER"},
@@ -305,7 +424,7 @@ void tease_program(const char *program_name) {
       {"waybar", "PLACEHOLDER"},
       {"wget", "PLACEHOLDER"},
       {"wine", "PLACEHOLDER"},
-      {"wireshark", 
+      {"wireshark",
        "Why bother? You don't understand any of the packet fields anyway."},
       {"zenmap", "PLACEHOLDER"},
       {"zoom", "PLACEHOLDER"}};

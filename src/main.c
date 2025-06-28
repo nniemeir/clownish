@@ -1,6 +1,7 @@
 #include "main.h"
 #include "envs.h"
 #include "exec.h"
+#include "file.h"
 #include "history.h"
 #include "parse.h"
 #include "prompt.h"
@@ -92,17 +93,22 @@ int main(int argc, char *argv[]) {
 
     if (teasing_enabled && current_ctx.args[0][0] != '\0') {
       int rd_num = rand() % (100 - 0 + 1) + 0;
-      if (rd_num <= 25) {
+      if (rd_num <= 20) {
+        tease_distro();
+        cleanup_ctx(&current_ctx);
+        continue;
+      }
+      if (rd_num <= 40) {
         tease_program(current_ctx.args[0]);
         cleanup_ctx(&current_ctx);
         continue;
       }
-      if (rd_num <= 50) {
+      if (rd_num <= 60) {
         tease_kernel();
         cleanup_ctx(&current_ctx);
         continue;
       }
-      if (rd_num <= 75) {
+      if (rd_num <= 80) {
         tease_terminal();
         cleanup_ctx(&current_ctx);
         continue;

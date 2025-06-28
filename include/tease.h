@@ -11,6 +11,8 @@
 #define NUM_OF_KNOWN_PROGRAMS 96
 #define NUM_OF_KNOWN_TERMINALS 2
 #define NUM_OF_KNOWN_DESKTOPS 81
+#define NUM_OF_KNOWN_DISTROS 96
+
 
 struct joke {
   char name[255];
@@ -22,6 +24,7 @@ extern int teasing_enabled;
 void tease_kernel(void);
 void tease_terminal(void);
 void tease_desktop(void);
+void tease_distro(void);
 int program_is_blacklisted(const char *program_name);
 void tease_program(const char *program_name);
 
