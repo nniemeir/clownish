@@ -92,23 +92,28 @@ int main(int argc, char *argv[]) {
     }
 
     if (teasing_enabled && current_ctx.args[0][0] != '\0') {
-      int rd_num = rand() % (100 - 0 + 1) + 0;
-      if (rd_num <= 20) {
+      int rd_num_1 = rand() % (100 - 0 + 1) + 0;
+      if (rd_num_1 <= 50) {
+        cleanup_ctx(&current_ctx);
+        continue;
+      }
+      int rd_num_2 = rand() % (100 - 0 + 1) + 0;
+      if (rd_num_2 <= 20) {
         tease_distro();
         cleanup_ctx(&current_ctx);
         continue;
       }
-      if (rd_num <= 40) {
+      if (rd_num_2 <= 40) {
         tease_program(current_ctx.args[0]);
         cleanup_ctx(&current_ctx);
         continue;
       }
-      if (rd_num <= 60) {
+      if (rd_num_2 <= 60) {
         tease_kernel();
         cleanup_ctx(&current_ctx);
         continue;
       }
-      if (rd_num <= 80) {
+      if (rd_num_2 <= 80) {
         tease_terminal();
         cleanup_ctx(&current_ctx);
         continue;

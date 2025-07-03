@@ -10,9 +10,11 @@
 #define NUM_OF_BLACKLISTED_PROGRAMS 3
 #define NUM_OF_KNOWN_PROGRAMS 96
 #define NUM_OF_KNOWN_TERMINALS 2
-#define NUM_OF_KNOWN_DESKTOPS 81
+#define NUM_OF_KNOWN_DESKTOPS 58
 #define NUM_OF_KNOWN_DISTROS 64
 
+#define GENERIC_MANUAL_TILER_MSG "I'm sure manual tiling saves you soooo much time."
+#define GENERIC_XWM_MSG "Wayland is the future."
 
 struct joke {
   char name[255];
