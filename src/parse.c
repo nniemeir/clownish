@@ -1,26 +1,27 @@
 #include "parse.h"
 #include "error.h"
 
-void remove_arg(char **args, unsigned int *args_count, unsigned int arg_index) {
+void remove_arg(char **command, unsigned int *args_count,
+                unsigned int arg_index) {
   if (arg_index == 0) {
-    fprintf(stderr, "Do you really think passing an args array to execvp "
+    fprintf(stderr, "Do you really think passing a command to execvp "
                     "without a command name is a good idea?\n");
     return;
   }
 
   if (arg_index >= *args_count) {
     fprintf(stderr,
-            "You can't remove the %uth element of an args array with only %u "
+            "You can't remove the %uth element of an array with only %u "
             "elements.\n",
             arg_index, *args_count - 1);
     return;
   }
 
   for (unsigned int i = arg_index; i < *args_count - 1; i++) {
-    args[i] = args[i + 1];
+    command[i] = command[i + 1];
   }
 
-  args[*args_count - 1] = NULL;
+  command[*args_count - 1] = NULL;
   (*args_count)--;
   return;
 }
@@ -64,9 +65,9 @@ void replace(char **original_str, const char *original_substr,
 
 void check_if_background(struct repl_ctx *current_ctx) {
   current_ctx->is_background_process = 0;
-  if (strcmp(current_ctx->args[current_ctx->args_count - 1], "&") == 0) {
+  if (strcmp(current_ctx->command[current_ctx->args_count - 1], "&") == 0) {
     current_ctx->is_background_process = 1;
-    remove_arg(current_ctx->args, &current_ctx->args_count,
+    remove_arg(current_ctx->command, &current_ctx->args_count,
                current_ctx->args_count - 1);
   }
 }
@@ -78,22 +79,22 @@ void determine_out_stream(struct repl_ctx *current_ctx) {
   char *gt;
   char *two_gt;
   for (unsigned int i = 0; i < current_ctx->args_count; i++) {
-    gt = strstr(current_ctx->args[i], ">");
+    gt = strstr(current_ctx->command[i], ">");
     if (gt) {
       current_ctx->out_stream_type = O_WRONLY;
-      strcpy(current_ctx->out_stream_name, current_ctx->args[i + 1]);
+      strcpy(current_ctx->out_stream_name, current_ctx->command[i + 1]);
       // Called twice to remove gt and the stream name
-      remove_arg(current_ctx->args, &current_ctx->args_count, i);
-      remove_arg(current_ctx->args, &current_ctx->args_count, i);
+      remove_arg(current_ctx->command, &current_ctx->args_count, i);
+      remove_arg(current_ctx->command, &current_ctx->args_count, i);
       return;
     }
 
-    two_gt = strstr(current_ctx->args[i], ">>");
+    two_gt = strstr(current_ctx->command[i], ">>");
     if (two_gt) {
       current_ctx->out_stream_type = O_APPEND;
-      strcpy(current_ctx->out_stream_name, current_ctx->args[i + 1]);
-      remove_arg(current_ctx->args, &current_ctx->args_count, i);
-      remove_arg(current_ctx->args, &current_ctx->args_count, i);
+      strcpy(current_ctx->out_stream_name, current_ctx->command[i + 1]);
+      remove_arg(current_ctx->command, &current_ctx->args_count, i);
+      remove_arg(current_ctx->command, &current_ctx->args_count, i);
       return;
     }
   }

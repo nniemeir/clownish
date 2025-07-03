@@ -9,18 +9,19 @@
 #include <linux/limits.h>
 #include <readline/readline.h>
 
-#define TOKENS_MAX 64
 #define DELIM " \t\r\n\a"
 #define NULL_TERMINATOR_LENGTH 1
-#define PROMPT_MAX (_SC_HOST_NAME_MAX + _SC_LOGIN_NAME_MAX + PATH_MAX)
+#define COMMANDS_MAX 1024
 #define ENV_MAX 4096
+#define PROMPT_MAX (_SC_HOST_NAME_MAX + _SC_LOGIN_NAME_MAX + PATH_MAX)
+#define TOKENS_MAX 64
 
 struct repl_ctx {
   char *home_dir;
   char *user;
   int receiving;
   char *input;
-  char **args;
+  char **command;
   unsigned int args_count;
   int is_background_process;
   char out_stream_name[256];

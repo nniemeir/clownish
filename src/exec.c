@@ -19,11 +19,11 @@ int cat(struct repl_ctx *current_ctx) {
 }
 
 int cd(struct repl_ctx *current_ctx) {
-  if (!current_ctx->args[1]) {
-    current_ctx->args[1] = current_ctx->home_dir;
+  if (!current_ctx->command[1]) {
+    current_ctx->command[1] = current_ctx->home_dir;
   }
 
-  if (chdir(current_ctx->args[1]) == -1) {
+  if (chdir(current_ctx->command[1]) == -1) {
     perror("clowniSH");
     fprintf(stderr, blame_user_msg, current_ctx->user);
   }
@@ -69,7 +69,7 @@ int exec_builtin(struct repl_ctx *current_ctx) {
       {"exit", exit_builtin},
       {"help", help}};
   for (int i = 0; i < NUM_OF_BUILTINS; i++) {
-    if (strcmp(current_ctx->args[0], built_ins[i].command_name) == 0) {
+    if (strcmp(current_ctx->command[0], built_ins[i].command_name) == 0) {
       return built_ins[i].command_function(current_ctx);
     }
   }
@@ -119,7 +119,7 @@ int exec(struct repl_ctx *current_ctx) {
       setpgid(0, 0);
     }
 
-    if (execvp(current_ctx->args[0], current_ctx->args) == -1) {
+    if (execvp(current_ctx->command[0], current_ctx->command) == -1) {
       fprintf(stderr, program_not_found_msg);
     }
 

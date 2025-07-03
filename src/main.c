@@ -37,7 +37,7 @@ void process_args(int argc, char *argv[]) {
 void cleanup_ctx(struct repl_ctx *current_ctx) {
   // Allocation of args only occurs if the string is not empty
   if (current_ctx->input[0] != '\0') {
-    free(current_ctx->args);
+    free(current_ctx->command);
   }
   if (current_ctx->input) {
     free(current_ctx->input);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    if (program_is_blacklisted(current_ctx.args[0])) {
+    if (program_is_blacklisted(current_ctx.command[0])) {
       cleanup_ctx(&current_ctx);
       continue;
     }
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    if (teasing_enabled && current_ctx.args[0][0] != '\0') {
+    if (teasing_enabled && current_ctx.command[0][0] != '\0') {
       int rd_num_1 = rand() % (100 - 0 + 1) + 0;
       if (rd_num_1 <= 50) {
         cleanup_ctx(&current_ctx);
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
         continue;
       }
       if (rd_num_2 <= 40) {
-        tease_program(current_ctx.args[0]);
+        tease_program(current_ctx.command[0]);
         cleanup_ctx(&current_ctx);
         continue;
       }

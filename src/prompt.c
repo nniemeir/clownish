@@ -43,9 +43,9 @@ int prompt_loop(struct repl_ctx *current_ctx) {
 
   current_ctx->args_count = 0;
 
-  current_ctx->args =
+  current_ctx->command =
       tokenize_input(current_ctx->input, &current_ctx->args_count);
-  if (!current_ctx->args[0]) {
+  if (!current_ctx->command[0]) {
     return 1;
   }
 
@@ -53,8 +53,8 @@ int prompt_loop(struct repl_ctx *current_ctx) {
   determine_out_stream(current_ctx);
 
   for (unsigned int i = 0; i < current_ctx->args_count; i++) {
-    replace(&current_ctx->args[i], "~", current_ctx->home_dir);
-    parse_envs(&current_ctx->args[i]);
+    replace(&current_ctx->command[i], "~", current_ctx->home_dir);
+    parse_envs(&current_ctx->command[i]);
   }
   return 0;
 }
