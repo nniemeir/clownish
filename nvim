@@ -1,9 +1,0 @@
-gcc -Wall -Wextra -pedantic -g -I include   -c -o src/envs.o src/envs.c
-gcc -Wall -Wextra -pedantic -g -I include   -c -o src/error.o src/error.c
-gcc -Wall -Wextra -pedantic -g -I include   -c -o src/exec.o src/exec.c
-gcc -Wall -Wextra -pedantic -g -I include   -c -o src/file.o src/file.c
-gcc -Wall -Wextra -pedantic -g -I include   -c -o src/history.o src/history.c
-gcc -Wall -Wextra -pedantic -g -I include   -c -o src/main.o src/main.c
-gcc -Wall -Wextra -pedantic -g -I include   -c -o src/parse.o src/parse.c
-gcc -Wall -Wextra -pedantic -g -I include   -c -o src/prompt.o src/prompt.c
-gcc -Wall -Wextra -pedantic -g -I include   -c -o src/tease.o src/tease.c
