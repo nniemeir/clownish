@@ -3,6 +3,16 @@
 #include "file.h"
 #include "parse.h"
 
+char *get_user_env(const char *var_name, struct user_env *user_envs,
+                   unsigned int user_envs_count) {
+  for (unsigned int i = 0; i < user_envs_count; i++) {
+    if (strcmp(var_name, user_envs[i].name) == 0) {
+      return user_envs[i].value;
+    }
+  }
+  return NULL;
+}
+
 int load_config(struct repl_ctx *current_ctx) {
   current_ctx->config_filename = malloc(PATH_MAX);
   if (!current_ctx->config_filename) {

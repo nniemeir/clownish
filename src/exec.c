@@ -31,12 +31,6 @@ int cd(struct repl_ctx *current_ctx) {
   return 1;
 }
 
-int exit_builtin(struct repl_ctx *current_ctx) {
-  current_ctx->receiving = 0;
-  printf("Finally giving up, %s?\n", current_ctx->user);
-  return 1;
-}
-
 int cler(struct repl_ctx *current_ctx) {
   if (!teasing_enabled) {
     return 0;
@@ -46,6 +40,12 @@ int cler(struct repl_ctx *current_ctx) {
           "made a typo in your haste, let's take a breather for a moment.\n");
   sleep(10);
   printf("Don't you feel better %s?\n", current_ctx->user);
+  return 1;
+}
+
+int exit_builtin(struct repl_ctx *current_ctx) {
+  current_ctx->receiving = 0;
+  printf("Finally giving up, %s?\n", current_ctx->user);
   return 1;
 }
 
@@ -109,18 +109,33 @@ int exec(struct repl_ctx *current_ctx) {
 
     if (current_ctx->in_stream_name[0] != '\0') {
       int in_fd = open(current_ctx->in_stream_name, O_RDONLY);
-      dup2(in_fd, fileno(stdin));
+      if (in_fd == -1) {
+        perror("open");
+      } else {
+        if (dup2(in_fd, fileno(stdin)) == -1) {
+          perror("dup2");
+          close(in_fd);
+        }
+      }
     }
 
-    int out_fd = -2;
     if (current_ctx->out_stream_name[0] != '\0') {
-      out_fd = open(current_ctx->out_stream_name,
-                    O_WRONLY | current_ctx->out_stream_type | O_CREAT, 0644);
-      dup2(out_fd, fileno(stdout));
+      int out_fd =
+          open(current_ctx->out_stream_name,
+               O_WRONLY | current_ctx->out_stream_type | O_CREAT, 0644);
+      if (out_fd == -1) {
+        perror("open");
+      } else {
+        if (dup2(out_fd, fileno(stdout)) == -1) {
+          perror("dup2");
+        }
+        close(out_fd);
+      }
     }
 
     if (execvp(current_ctx->command[0], current_ctx->command) == -1) {
-      fprintf(stderr, program_not_found_msg);
+      perror("clowniSH");
+      exit(EXIT_FAILURE);
     }
   }
   return 0;

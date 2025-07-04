@@ -4,6 +4,43 @@
 
 int teasing_enabled = 1;
 
+void tease_roll(struct repl_ctx *current_ctx) {
+  int rd_num_2 = rand() % (100 - 0 + 1) + 0;
+  if (rd_num_2 <= 20) {
+    tease_distro();
+    return;
+  }
+  if (rd_num_2 <= 40) {
+    tease_program(current_ctx->command[0]);
+    return;
+  }
+  if (rd_num_2 <= 60) {
+    tease_kernel();
+    return;
+  }
+  if (rd_num_2 <= 80) {
+    tease_terminal();
+    return;
+  }
+  tease_desktop();
+}
+
+int program_is_blacklisted(const char *program_name) {
+  static const struct joke blacklisted_programs[NUM_OF_BLACKLISTED_PROGRAMS] = {
+      {"emacs", "No, use vim."},
+      {"neofetch", "Do we really need another minimalist cyberpunk anime "
+                   "girl tiling WM rice?"},
+      {"surf", "Use a real web browser."}};
+
+  for (int i = 0; i < NUM_OF_BLACKLISTED_PROGRAMS; i++) {
+    if (strcmp(program_name, blacklisted_programs[i].name) == 0) {
+      printf("%s\n", blacklisted_programs[i].comment);
+      return 1;
+    }
+  }
+  return 0;
+}
+
 void joke_binary_search(const struct joke *known_x, unsigned int array_size,
                         const char *target) {
   unsigned int lower_bound = 0;
@@ -38,6 +75,84 @@ void joke_binary_search(const struct joke *known_x, unsigned int array_size,
   if (match_found) {
     printf("%s\n", known_x[middle_value].comment);
   }
+}
+
+// XDG_CURRENT_DESKTOP has been part of the Desktop Entry Specification since
+// version 1.2 (2017), but is not universally respected (See Sway WM PR #4876)
+void tease_desktop(void) {
+  static int called = 0;
+  if (called == 1) {
+    return;
+  }
+  called = 1;
+
+  char *desktop = getenv("XDG_CURRENT_DESKTOP");
+  if (!desktop) {
+    fprintf(stderr, env_fail_msg, "XDG_CURRENT_DESKTOP");
+    return;
+  }
+
+  // TO DO - Confirm XDG_CURRENT_DESKTOP values for each of these
+  static const struct joke known_desktops[NUM_OF_KNOWN_DESKTOPS] = {
+      {"2bwm", "2bwm? How many times have you had to recompile it today?"},
+      {"9wm", "9wm? Looks like Plan 9 while actually being useful."},
+      {"afterstep", "Afterstep? My nonexistent eyes are bleeding."},
+      {"awesome", "Dear Ritchie, you configure your window manager in LUA?"},
+      {"berry", GENERIC_XWM_MSG},
+      {"bspwm", "bspwm, so minimal it doesn't handle keybindings."},
+      {"budgie", "Budgie? Oh right, I remember it now."},
+      {"cde", "CDE? Can you help me fix my walkman?"},
+      {"cinnamon",
+       "Oh, you're on Cinnamon. How's your first week in linux going?"},
+      {"COSMIC", "COSMIC and clowniSH? You must really like alpha software."},
+      {"cutefish", "CUTEFISH LIVES."},
+      {"deepin", "Deepin? Bold choice trusting them with your data."},
+      {"enlightenment",
+       "Wow, Enlightenment? That's a name I haven't heard in a long time..."},
+      {"exwm", "Emacs is a fine desktop environment, maybe someday IT WILL GET "
+               "A GOOD TEXT EDITOR."},
+      {"frankenwm", "FrankenWM, because DWM is just too mainstream."},
+      {"GNOME-Flashback", "You know MATE exists, right?"},
+      {"gnome", "How is the search for GNOME extensions that haven't been "
+                "deprecated going?"},
+      {"hackmatrix", "Oh my, a 3D window manager? That must make you so much "
+                     "more productive."},
+      {"herbstluftwm", GENERIC_MANUAL_TILER_MSG},
+      {"hyprland", "Are the fancy animations worth the instability?"},
+      {"i3", GENERIC_MANUAL_TILER_MSG},
+      {"icewm", GENERIC_MANUAL_TILER_MSG},
+      {"jwm", "jwm? that is acceptable."},
+      {"kde", "A KDE user? I'm sure you'll need access to all those options."},
+      {"leftwm", "A Rust-based WM, how trendy."},
+      {"lxde", "Move to LXQT already."},
+      {"lxqt",
+       "LXQT, 90%% of the memory usage of XFCE with 20%% of the features."},
+      {"MATE", "MATE? The 2000s were pretty great, weren't they?"},
+      {"maxxdesktop", "Do you miss your old SGI Indigo?"},
+      {"niri", "A wayland compositor written in Rust? How hip, how modern."},
+      {"openbox", "Did you know that some floating WMs actually let you snap "
+                  "windows with your mouse?"},
+      {"pekwm", GENERIC_XWM_MSG},
+      {"plainDE", GENERIC_XWM_MSG},
+      {"qtile", "A WM in Python? Why?"},
+      {"ratpoison", "Go on, tell me all about how your WM helps you avoid RSI. "
+                    "I care immensely."},
+      {"spectrwm",
+       "You can probably spare more than 20MB of memory for your WM."},
+      {"stumpwm", GENERIC_XWM_MSG},
+      {"sway", "You just can't let go of i3, can you?"}, // CONFIRMED
+      {"tde", GENERIC_XWM_MSG},
+      {"theDesk", GENERIC_XWM_MSG},
+      {"tinywm", "Are you sure this shell is minimal enough for you?"},
+      {"trinity", GENERIC_XWM_MSG},
+      {"ukui", "Your desktop environment looks like a movie mock-up of Windows 7."},
+      {"Unity", "Unity? It's okay, you can move on."},
+      {"windowmaker", "You don't have to use Window Maker, this isn't PS2 Linux."},
+      {"wingo", "wingo? Don't you know its in maintenance mode?"},
+      {"worm", "No keyboard mapper?"},
+      {"xfce", "XFCE? Booooring"},
+      {"xmonad", "Did you learn a whole programming language just to configure your WM?"}};
+  joke_binary_search(known_desktops, NUM_OF_KNOWN_DESKTOPS, desktop);
 }
 
 // os-release NAME values sourced from which-distro's collection
@@ -141,84 +256,6 @@ void tease_distro(void) {
   free(os_release);
 }
 
-// XDG_CURRENT_DESKTOP has been part of the Desktop Entry Specification since
-// version 1.2 (2017), but is not universally respected (See Sway WM PR #4876)
-void tease_desktop(void) {
-  static int called = 0;
-  if (called == 1) {
-    return;
-  }
-  called = 1;
-
-  char *desktop = getenv("XDG_CURRENT_DESKTOP");
-  if (!desktop) {
-    fprintf(stderr, env_fail_msg, "XDG_CURRENT_DESKTOP");
-    return;
-  }
-
-  // TO DO - Confirm XDG_CURRENT_DESKTOP values for each of these
-  static const struct joke known_desktops[NUM_OF_KNOWN_DESKTOPS] = {
-      {"2bwm", "2bwm? How many times have you had to recompile it today?"},
-      {"9wm", "9wm? Looks like Plan 9 while actually being useful."},
-      {"afterstep", "Afterstep? My nonexistent eyes are bleeding."},
-      {"awesome", "Dear Ritchie, you configure your window manager in LUA?"},
-      {"berry", GENERIC_XWM_MSG},
-      {"bspwm", "bspwm, so minimal it doesn't handle keybindings."},
-      {"budgie", "Budgie? Oh right, I remember it now."},
-      {"cde", "CDE? Can you help me fix my walkman?"},
-      {"cinnamon",
-       "Oh, you're on Cinnamon. How's your first week in linux going?"},
-      {"COSMIC", "COSMIC and clowniSH? You must really like alpha software."},
-      {"cutefish", "CUTEFISH LIVES."},
-      {"deepin", "Deepin? Bold choice trusting them with your data."},
-      {"enlightenment",
-       "Wow, Enlightenment? That's a name I haven't heard in a long time..."},
-      {"exwm", "Emacs is a fine desktop environment, maybe someday IT WILL GET "
-               "A GOOD TEXT EDITOR."},
-      {"frankenwm", "FrankenWM, because DWM is just too mainstream."},
-      {"GNOME-Flashback", "You know MATE exists, right?"},
-      {"gnome", "How is the search for GNOME extensions that haven't been "
-                "deprecated going?"},
-      {"hackmatrix", "Oh my, a 3D window manager? That must make you so much "
-                     "more productive."},
-      {"herbstluftwm", GENERIC_MANUAL_TILER_MSG},
-      {"hyprland", "Are the fancy animations worth the instability?"},
-      {"i3", GENERIC_MANUAL_TILER_MSG},
-      {"icewm", GENERIC_MANUAL_TILER_MSG},
-      {"jwm", "jwm? that is acceptable."},
-      {"kde", "A KDE user? I'm sure you'll need access to all those options."},
-      {"leftwm", "A Rust-based WM, how trendy."},
-      {"lxde", "Move to LXQT already."},
-      {"lxqt",
-       "LXQT, 90%% of the memory usage of XFCE with 20%% of the features."},
-      {"MATE", "MATE? The 2000s were pretty great, weren't they?"},
-      {"maxxdesktop", "Do you miss your old SGI Indigo?"},
-      {"niri", "A wayland compositor written in Rust? How hip, how modern."},
-      {"openbox", "Did you know that some floating WMs actually let you snap "
-                  "windows with your mouse?"},
-      {"pekwm", GENERIC_XWM_MSG},
-      {"plainDE", GENERIC_XWM_MSG},
-      {"qtile", "A WM in Python? Why?"},
-      {"ratpoison", "Go on, tell me all about how your WM helps you avoid RSI. "
-                    "I care immensely."},
-      {"spectrwm",
-       "You can probably spare more than 20MB of memory for your WM."},
-      {"stumpwm", GENERIC_XWM_MSG},
-      {"sway", "You just can't let go of i3, can you?"}, // CONFIRMED
-      {"tde", GENERIC_XWM_MSG},
-      {"theDesk", GENERIC_XWM_MSG},
-      {"tinywm", "Are you sure this shell is minimal enough for you?"},
-      {"trinity", GENERIC_XWM_MSG},
-      {"ukui", "Your desktop environment looks like a movie mock-up of Windows 7."},
-      {"Unity", "Unity? It's okay, you can move on."},
-      {"windowmaker", "You don't have to use Window Maker, this isn't PS2 Linux."},
-      {"wingo", "wingo? Don't you know its in maintenance mode?"},
-      {"worm", "No keyboard mapper?"},
-      {"xfce", "XFCE? Booooring"},
-      {"xmonad", "Did you learn a whole programming language just to configure your WM?"}};
-  joke_binary_search(known_desktops, NUM_OF_KNOWN_DESKTOPS, desktop);
-}
-
 void tease_kernel(void) {
   static int called = 0;
   if (called == 1) {
@@ -245,47 +282,6 @@ void tease_kernel(void) {
     printf("Please tell me this thing isn't connected to the internet on such "
            "an old kernel.\n");
   }
-}
-
-// This will likely be overhauled in the future, as many terminals use the same
-// TERM value
-void tease_terminal(void) {
-  static int called = 0;
-  if (called == 1) {
-    return;
-  }
-  called = 1;
-  const char *term = getenv("TERM");
-  if (!term) {
-    fprintf(stderr, env_fail_msg, term);
-  }
-
-  static const struct joke known_terminals[NUM_OF_KNOWN_TERMINALS] = {
-      {"st-256color", "An st user? You must be fun at parties."},
-      {"xterm-kitty", "AN UPDATE FOR KITTY IS AVAILABLE."}};
-
-  for (int i = 0; i < NUM_OF_KNOWN_TERMINALS; i++) {
-    if (strcmp(term, known_terminals[i].name) == 0) {
-      printf("%s\n", known_terminals[i].comment);
-      return;
-    }
-  }
-}
-
-int program_is_blacklisted(const char *program_name) {
-  static const struct joke blacklisted_programs[NUM_OF_BLACKLISTED_PROGRAMS] = {
-      {"emacs", "No, use vim."},
-      {"neofetch", "Do we really need another minimalist cyberpunk anime "
-                   "girl tiling WM rice?"},
-      {"surf", "Use a real web browser."}};
-
-  for (int i = 0; i < NUM_OF_BLACKLISTED_PROGRAMS; i++) {
-    if (strcmp(program_name, blacklisted_programs[i].name) == 0) {
-      printf("%s\n", blacklisted_programs[i].comment);
-      return 1;
-    }
-  }
-  return 0;
 }
 
 void tease_program(const char *program_name) {
@@ -335,4 +331,29 @@ void tease_program(const char *program_name) {
       {"zoom", "You might as well just livestream your webcam to the internet."}};
 
   joke_binary_search(known_programs, NUM_OF_KNOWN_PROGRAMS, program_name);
+}
+
+// This will likely be overhauled in the future, as many terminals use the same
+// TERM value
+void tease_terminal(void) {
+  static int called = 0;
+  if (called == 1) {
+    return;
+  }
+  called = 1;
+  const char *term = getenv("TERM");
+  if (!term) {
+    fprintf(stderr, env_fail_msg, term);
+  }
+
+  static const struct joke known_terminals[NUM_OF_KNOWN_TERMINALS] = {
+      {"st-256color", "An st user? You must be fun at parties."},
+      {"xterm-kitty", "AN UPDATE FOR KITTY IS AVAILABLE."}};
+
+  for (int i = 0; i < NUM_OF_KNOWN_TERMINALS; i++) {
+    if (strcmp(term, known_terminals[i].name) == 0) {
+      printf("%s\n", known_terminals[i].comment);
+      return;
+    }
+  }
 }

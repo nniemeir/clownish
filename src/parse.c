@@ -1,5 +1,8 @@
 #include "parse.h"
+#include "config.h"
 #include "error.h"
+
+static const char *delim = " \t\r\n\a";
 
 void remove_arg(char **command, unsigned int *args_count,
                 unsigned int arg_index) {
@@ -63,7 +66,7 @@ void replace(char **original_str, const char *original_substr,
   free(new_str);
 }
 
-void check_if_background(struct repl_ctx *current_ctx) {
+void determine_if_background(struct repl_ctx *current_ctx) {
   current_ctx->is_background_process = 0;
   if (strcmp(current_ctx->command[current_ctx->args_count - 1], "&") == 0) {
     current_ctx->is_background_process = 1;
@@ -117,16 +120,6 @@ void determine_out_stream(struct repl_ctx *current_ctx) {
   }
 }
 
-char *get_user_env(char *var_name, struct user_env *user_envs,
-                   unsigned int user_envs_count) {
-  for (unsigned int i = 0; i < user_envs_count; i++) {
-    if (strcmp(var_name, user_envs[i].name) == 0) {
-      return user_envs[i].value;
-    }
-  }
-  return NULL;
-}
-
 void parse_envs(char **arg, struct user_env *user_envs,
                 unsigned int user_envs_count) {
   char *start = *arg;
@@ -165,7 +158,7 @@ char **tokenize_input(char *line, unsigned int *args_count) {
   }
 
   char *token;
-  token = strtok(line, DELIM);
+  token = strtok(line, delim);
 
   while (token) {
     tokens[*args_count] = token;
@@ -181,7 +174,7 @@ char **tokenize_input(char *line, unsigned int *args_count) {
       }
     }
 
-    token = strtok(NULL, DELIM);
+    token = strtok(NULL, delim);
   }
 
   tokens[*args_count] = NULL;

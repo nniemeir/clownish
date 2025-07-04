@@ -49,7 +49,7 @@ int prompt_loop(struct repl_ctx *current_ctx) {
     return 1;
   }
 
-  check_if_background(current_ctx);
+  determine_if_background(current_ctx);
   determine_in_stream(current_ctx);
   determine_out_stream(current_ctx);
 

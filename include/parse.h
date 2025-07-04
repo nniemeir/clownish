@@ -9,7 +9,6 @@
 #include <linux/limits.h>
 #include <readline/readline.h>
 
-#define DELIM " \t\r\n\a"
 #define NULL_TERMINATOR_LENGTH 1
 #define COMMANDS_MAX 1024
 #define ENV_MAX 4096
@@ -41,7 +40,7 @@ struct repl_ctx {
 void remove_arg(char **args, unsigned int *args_count, unsigned int arg_index);
 void replace(char **original_str, const char *original_substr,
              const char *new_substr);
-void check_if_background(struct repl_ctx *current_ctx);
+void determine_if_background(struct repl_ctx *current_ctx);
 void determine_in_stream(struct repl_ctx *current_ctx);
 void determine_out_stream(struct repl_ctx *current_ctx);
 void parse_envs(char **arg, struct user_env *user_envs, unsigned int user_envs_count);

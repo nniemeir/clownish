@@ -24,11 +24,12 @@ struct joke {
 
 extern int teasing_enabled;
 
-void tease_kernel(void);
-void tease_terminal(void);
+int program_is_blacklisted(const char *program_name);
+void tease_roll(struct repl_ctx *current_ctx);
 void tease_desktop(void);
 void tease_distro(void);
-int program_is_blacklisted(const char *program_name);
+void tease_kernel(void);
 void tease_program(const char *program_name);
+void tease_terminal(void);
 
 #endif

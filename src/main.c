@@ -45,49 +45,43 @@ void cleanup_ctx(struct repl_ctx *current_ctx) {
   }
 }
 
-void tease_roll(struct repl_ctx *current_ctx) {
-  int rd_num_2 = rand() % (100 - 0 + 1) + 0;
-  if (rd_num_2 <= 20) {
-    tease_distro();
-    return;
-  }
-  if (rd_num_2 <= 40) {
-    tease_program(current_ctx->command[0]);
-    return;
-  }
-  if (rd_num_2 <= 60) {
-    tease_kernel();
-    return;
-  }
-  if (rd_num_2 <= 80) {
-    tease_terminal();
-    return;
-  }
-  tease_desktop();
+void init_sig_handler() {
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_handler = handler;
+  sigaction(SIGINT, &sa, NULL);
 }
 
-int main(int argc, char *argv[]) {
-  process_args(argc, argv);
-
-  struct repl_ctx current_ctx;
-  current_ctx.home_dir = init_home_dir();
-  if (!current_ctx.home_dir) {
+void init_current_ctx(struct repl_ctx *current_ctx) {
+  current_ctx->home_dir = init_home_dir();
+  if (!current_ctx->home_dir) {
     exit(EXIT_FAILURE);
   }
 
-  load_config(&current_ctx);
+  load_config(current_ctx);
 
-  current_ctx.user = get_env_s("USER", "Keith");
+  current_ctx->user = getenv_checked("USER", "Keith");
+}
+
+int main(int argc, char *argv[]) {
+  if (geteuid() == 0) {
+    fprintf(stderr,
+            "Running this as root? I cannot sanction your buffoonery.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  process_args(argc, argv);
+
+  struct repl_ctx current_ctx;
+
+  init_current_ctx(&current_ctx);
 
   char *hist_file = init_history(current_ctx.home_dir);
   if (!hist_file) {
     exit(EXIT_FAILURE);
   }
 
-  struct sigaction sa;
-  memset(&sa, 0, sizeof(sa));
-  sa.sa_handler = handler;
-  sigaction(SIGINT, &sa, NULL);
+  init_sig_handler();
 
   srand(time(NULL));
 
