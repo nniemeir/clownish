@@ -32,6 +32,8 @@ struct repl_ctx {
   char **command;
   unsigned int args_count;
   int is_background_process;
+  char in_stream_name[256];
+  int in_stream_type;
   char out_stream_name[256];
   int out_stream_type;
 };
@@ -40,6 +42,7 @@ void remove_arg(char **args, unsigned int *args_count, unsigned int arg_index);
 void replace(char **original_str, const char *original_substr,
              const char *new_substr);
 void check_if_background(struct repl_ctx *current_ctx);
+void determine_in_stream(struct repl_ctx *current_ctx);
 void determine_out_stream(struct repl_ctx *current_ctx);
 void parse_envs(char **arg, struct user_env *user_envs, unsigned int user_envs_count);
 char **tokenize_input(char *line, unsigned int *args_count);

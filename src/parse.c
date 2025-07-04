@@ -72,6 +72,23 @@ void check_if_background(struct repl_ctx *current_ctx) {
   }
 }
 
+void determine_in_stream(struct repl_ctx *current_ctx) {
+  current_ctx->in_stream_type = 0;
+  strcpy(current_ctx->in_stream_name, "");
+
+  char *lt;
+  for (unsigned int i = 0; i < current_ctx->args_count; i++) {
+    lt = strstr(current_ctx->command[i], "<");
+    if (lt) {
+      strcpy(current_ctx->in_stream_name, current_ctx->command[i + 1]);
+      // Called twice to remove lt and the stream name
+      remove_arg(current_ctx->command, &current_ctx->args_count, i);
+      remove_arg(current_ctx->command, &current_ctx->args_count, i);
+      return;
+    }
+  }
+}
+
 void determine_out_stream(struct repl_ctx *current_ctx) {
   current_ctx->out_stream_type = 0;
   strcpy(current_ctx->out_stream_name, "");

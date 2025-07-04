@@ -1,6 +1,6 @@
 #include "exec.h"
-#include "tease.h"
 #include "error.h"
+#include "tease.h"
 
 int cat(struct repl_ctx *current_ctx) {
   if (!teasing_enabled) {
@@ -41,8 +41,9 @@ int cler(struct repl_ctx *current_ctx) {
   if (!teasing_enabled) {
     return 0;
   }
-  fprintf(stderr, "Perhaps you meant to type clear but "
-         "made a typo in your haste, let's take a breather for a moment.\n");
+  fprintf(stderr,
+          "Perhaps you meant to type clear but "
+          "made a typo in your haste, let's take a breather for a moment.\n");
   sleep(10);
   printf("Don't you feel better %s?\n", current_ctx->user);
   return 1;
@@ -93,24 +94,11 @@ int exec(struct repl_ctx *current_ctx) {
     return 1;
   }
 
-  int fd = -2;
-  int copy_out;
-  if (current_ctx->out_stream_name[0] != '\0') {
-    fd = open(current_ctx->out_stream_name,
-              O_WRONLY | current_ctx->out_stream_type | O_CREAT, 0644);
-    copy_out = dup(fileno(stdout));
-    dup2(fd, fileno(stdout));
-  }
-
   // Parent process
   if (pid > 0 && !current_ctx->is_background_process) {
     do {
       waitpid(pid, &status, WUNTRACED);
     } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-  }
-  if (fd != -2) {
-    dup2(copy_out, fileno(stdout));
-    close(copy_out);
   }
 
   // Child process
@@ -119,16 +107,21 @@ int exec(struct repl_ctx *current_ctx) {
       setpgid(0, 0);
     }
 
+    if (current_ctx->in_stream_name[0] != '\0') {
+      int in_fd = open(current_ctx->in_stream_name, O_RDONLY);
+      dup2(in_fd, fileno(stdin));
+    }
+
+    int out_fd = -2;
+    if (current_ctx->out_stream_name[0] != '\0') {
+      out_fd = open(current_ctx->out_stream_name,
+                    O_WRONLY | current_ctx->out_stream_type | O_CREAT, 0644);
+      dup2(out_fd, fileno(stdout));
+    }
+
     if (execvp(current_ctx->command[0], current_ctx->command) == -1) {
       fprintf(stderr, program_not_found_msg);
     }
-
-    if (fd != -2) {
-      dup2(copy_out, fileno(stdout));
-      close(copy_out);
-    }
-
-    return 0;
   }
   return 0;
 }

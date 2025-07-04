@@ -50,6 +50,7 @@ int prompt_loop(struct repl_ctx *current_ctx) {
   }
 
   check_if_background(current_ctx);
+  determine_in_stream(current_ctx);
   determine_out_stream(current_ctx);
 
   for (unsigned int i = 0; i < current_ctx->args_count; i++) {
