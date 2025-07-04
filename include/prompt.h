@@ -1,7 +1,7 @@
 #ifndef PROMPT_H
 #define PROMPT_H
 
-#include "../include/parse.h"
+#include "parse.h"
 #include <linux/limits.h>
 #include <readline/history.h>
 #include <readline/readline.h>

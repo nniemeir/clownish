@@ -1,0 +1,86 @@
+#include "config.h"
+#include "error.h"
+#include "file.h"
+#include "parse.h"
+
+int load_config(struct repl_ctx *current_ctx) {
+  current_ctx->config_filename = malloc(PATH_MAX);
+  if (!current_ctx->config_filename) {
+    fprintf(stderr, malloc_fail_msg, "Config file");
+    return 1;
+  }
+  snprintf(current_ctx->config_filename, PATH_MAX, "%s/.clownrc",
+           current_ctx->home_dir);
+
+  current_ctx->user_envs_count = 0;
+
+  if (!file_exists(current_ctx->config_filename)) {
+    return 0;
+  }
+
+  char *config_file_contents = read_file(current_ctx->config_filename);
+  if (!config_file_contents) {
+    fprintf(stderr, "Failed to read %s\n", "Config file");
+    return 1;
+  }
+
+  for (const char *temp = config_file_contents; (temp = strchr(temp, '='));
+       temp += 1) {
+    current_ctx->user_envs_count++;
+  }
+
+  if (current_ctx->user_envs_count == 0) {
+    return 1;
+  }
+
+  current_ctx->user_envs =
+      malloc(current_ctx->user_envs_count * sizeof(struct user_env));
+
+  if (!current_ctx->user_envs) {
+    fprintf(stderr, malloc_fail_msg, "user_envs");
+    free(config_file_contents);
+    return 1;
+  }
+
+  char *current_line = strtok(config_file_contents, "\n");
+  unsigned int index = 0;
+
+  while (current_line && index < current_ctx->user_envs_count) {
+    char *equal_sign = strchr(current_line, '=');
+    if (!equal_sign) {
+      current_line = strtok(NULL, "\n");
+      continue;
+    }
+
+    if (strcmp(equal_sign + 1, "=") == 0) {
+      fprintf(stderr, "Malformed configuration file.");
+      free(config_file_contents);
+      return 1;
+    }
+
+    size_t name_len = equal_sign - current_line;
+    size_t value_len = strlen(equal_sign + 1);
+
+    current_ctx->user_envs[index].name = malloc(name_len + 1);
+    if (!current_ctx->user_envs[index].name) {
+      fprintf(stderr, malloc_fail_msg, "user_env name");
+      free(config_file_contents);
+      return 1;
+    }
+    current_ctx->user_envs[index].value = malloc(value_len + 1);
+    if (!current_ctx->user_envs[index].value) {
+      fprintf(stderr, malloc_fail_msg, "user_env value");
+      free(current_ctx->user_envs[index].name);
+      free(config_file_contents);
+      return 1;
+    }
+    strncpy(current_ctx->user_envs[index].name, current_line, name_len);
+    current_ctx->user_envs[index].name[name_len] = '\0';
+    strcpy(current_ctx->user_envs[index].value, equal_sign + 1);
+
+    index++;
+    current_line = strtok(NULL, "\n");
+  }
+  free(config_file_contents);
+  return 0;
+}

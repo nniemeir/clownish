@@ -1,22 +1,28 @@
 #include "file.h"
+#include "error.h"
+#include "parse.h"
+
+int file_exists(const char *filename) {
+  struct stat buffer;
+  return stat(filename, &buffer) == 0 ? 1 : 0;
+}
 
 char *read_file(const char *file_path) {
   FILE *file = fopen(file_path, "rb");
   if (!file) {
-    // log_event(program_name, ERROR,
-             // "read_file failed to open the requested file.", // log_to_file);
+    fprintf(stderr, "Failed to open %s", file_path);
     return NULL;
   }
 
   if (fseek(file, 0, SEEK_END) == -1) {
-    // log_event(program_name, ERROR, "fseek failed.", // log_to_file);
+    fprintf(stderr, "fseek failed.");
     fclose(file);
     return NULL;
   }
 
   long size = ftell(file);
   if (size == -1) {
-    // log_event(program_name, ERROR, "ftell failed.", // log_to_file);
+    fprintf(stderr, "ftell failed.");
     fclose(file);
     return NULL;
   }
@@ -25,21 +31,20 @@ char *read_file(const char *file_path) {
   rewind(file);
 
   char *buffer;
-  buffer = malloc(file_size);
+  buffer = malloc(file_size + NULL_TERMINATOR_LENGTH);
   if (!buffer) {
-    // log_event(program_name, ERROR, "Failed to allocate memory for file buffer.",
-              // log_to_file);
+    fprintf(stderr, malloc_fail_msg, "file buffer");
     fclose(file);
     return NULL;
   }
   const size_t bytes_read = fread(buffer, 1, file_size, file);
   if (bytes_read != file_size) {
-    // log_event(program_name, ERROR, "Error reading file into buffer.",
-              // log_to_file);
+    fprintf(stderr, "fread failed.");
     free(buffer);
     fclose(file);
     return NULL;
   }
   fclose(file);
+  buffer[file_size] = '\0';
   return buffer;
 }

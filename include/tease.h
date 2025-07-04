@@ -1,7 +1,7 @@
 #ifndef TEASE_H
 #define TEASE_H
 
-#include "../include/parse.h"
+#include "parse.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

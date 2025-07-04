@@ -1,4 +1,5 @@
 #include "main.h"
+#include "config.h"
 #include "envs.h"
 #include "exec.h"
 #include "file.h"
@@ -44,6 +45,27 @@ void cleanup_ctx(struct repl_ctx *current_ctx) {
   }
 }
 
+void tease_roll(struct repl_ctx *current_ctx) {
+  int rd_num_2 = rand() % (100 - 0 + 1) + 0;
+  if (rd_num_2 <= 20) {
+    tease_distro();
+    return;
+  }
+  if (rd_num_2 <= 40) {
+    tease_program(current_ctx->command[0]);
+    return;
+  }
+  if (rd_num_2 <= 60) {
+    tease_kernel();
+    return;
+  }
+  if (rd_num_2 <= 80) {
+    tease_terminal();
+    return;
+  }
+  tease_desktop();
+}
+
 int main(int argc, char *argv[]) {
   process_args(argc, argv);
 
@@ -52,6 +74,8 @@ int main(int argc, char *argv[]) {
   if (!current_ctx.home_dir) {
     exit(EXIT_FAILURE);
   }
+
+  load_config(&current_ctx);
 
   current_ctx.user = get_env_s("USER", "Keith");
 
@@ -69,6 +93,7 @@ int main(int argc, char *argv[]) {
 
   current_ctx.receiving = 1;
   current_ctx.input = NULL;
+  bool teasing_current_command = true;
   while (current_ctx.receiving) {
     if (prompt_loop(&current_ctx)) {
       cleanup_ctx(&current_ctx);
@@ -92,34 +117,12 @@ int main(int argc, char *argv[]) {
     }
 
     if (teasing_enabled && current_ctx.command[0][0] != '\0') {
-      int rd_num_1 = rand() % (100 - 0 + 1) + 0;
-      if (rd_num_1 <= 50) {
-        cleanup_ctx(&current_ctx);
-        continue;
+      if (teasing_current_command) {
+        tease_roll(&current_ctx);
       }
-      int rd_num_2 = rand() % (100 - 0 + 1) + 0;
-      if (rd_num_2 <= 20) {
-        tease_distro();
-        cleanup_ctx(&current_ctx);
-        continue;
-      }
-      if (rd_num_2 <= 40) {
-        tease_program(current_ctx.command[0]);
-        cleanup_ctx(&current_ctx);
-        continue;
-      }
-      if (rd_num_2 <= 60) {
-        tease_kernel();
-        cleanup_ctx(&current_ctx);
-        continue;
-      }
-      if (rd_num_2 <= 80) {
-        tease_terminal();
-        cleanup_ctx(&current_ctx);
-        continue;
-      }
-      tease_desktop();
+      teasing_current_command = !teasing_current_command;
     }
+
     cleanup_ctx(&current_ctx);
   }
   close_history(hist_file);

@@ -54,7 +54,7 @@ int prompt_loop(struct repl_ctx *current_ctx) {
 
   for (unsigned int i = 0; i < current_ctx->args_count; i++) {
     replace(&current_ctx->command[i], "~", current_ctx->home_dir);
-    parse_envs(&current_ctx->command[i]);
+    parse_envs(&current_ctx->command[i], current_ctx->user_envs, current_ctx->user_envs_count);
   }
   return 0;
 }

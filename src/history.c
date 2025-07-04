@@ -7,7 +7,7 @@ char *init_history(char *home_dir) {
     fprintf(stderr, malloc_fail_msg, "hist_file");
     return NULL;
   }
-  snprintf(hist_file, PATH_MAX, "%s/.scribbles", home_dir);
+  snprintf(hist_file, PATH_MAX, "%s/.clown_scribbles", home_dir);
   using_history();
   read_history(hist_file);
   return hist_file;

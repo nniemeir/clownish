@@ -16,8 +16,16 @@
 #define PROMPT_MAX (_SC_HOST_NAME_MAX + _SC_LOGIN_NAME_MAX + PATH_MAX)
 #define TOKENS_MAX 64
 
+struct user_env {
+  char *name;
+  char *value;
+};
+
 struct repl_ctx {
   char *home_dir;
+  char *config_filename;
+  struct user_env *user_envs;
+  unsigned int user_envs_count;
   char *user;
   int receiving;
   char *input;
@@ -33,7 +41,7 @@ void replace(char **original_str, const char *original_substr,
              const char *new_substr);
 void check_if_background(struct repl_ctx *current_ctx);
 void determine_out_stream(struct repl_ctx *current_ctx);
-int parse_envs(char **arg);
+void parse_envs(char **arg, struct user_env *user_envs, unsigned int user_envs_count);
 char **tokenize_input(char *line, unsigned int *args_count);
 
 #endif

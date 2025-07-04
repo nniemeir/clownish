@@ -100,24 +100,43 @@ void determine_out_stream(struct repl_ctx *current_ctx) {
   }
 }
 
-int parse_envs(char **arg) {
+char *get_user_env(char *var_name, struct user_env *user_envs,
+                   unsigned int user_envs_count) {
+  for (unsigned int i = 0; i < user_envs_count; i++) {
+    if (strcmp(var_name, user_envs[i].name) == 0) {
+      return user_envs[i].value;
+    }
+  }
+  return NULL;
+}
+
+void parse_envs(char **arg, struct user_env *user_envs,
+                unsigned int user_envs_count) {
   char *start = *arg;
   if (strstr(start, "$")) {
     char var_name[ENV_MAX];
-    int i = 0;
+    unsigned int i = 0;
     start++;
     while (*start && (isalnum(*start) || *start == '_')) {
       var_name[i++] = *start++;
     }
     var_name[i] = '\0';
-    char *env_value = getenv(var_name);
+    char *env_value;
+    if (user_envs_count > 0) {
+      env_value = get_user_env(var_name, user_envs, user_envs_count);
+      if (env_value) {
+        *arg = env_value;
+        return;
+      }
+    }
+    env_value = getenv(var_name);
     if (!env_value) {
       fprintf(stderr, env_fail_msg, var_name);
       env_value = "";
     }
     *arg = env_value;
+    return;
   }
-  return 1;
 }
 
 char **tokenize_input(char *line, unsigned int *args_count) {

@@ -1,7 +1,7 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-#include "../include/parse.h"
+#include "parse.h"
 #include <fcntl.h>
 #include <linux/limits.h>
 #include <stdio.h>
