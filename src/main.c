@@ -1,6 +1,7 @@
 #include "main.h"
 #include "config.h"
 #include "envs.h"
+#include "error.h"
 #include "exec.h"
 #include "file.h"
 #include "history.h"
@@ -45,11 +46,15 @@ void cleanup_ctx(struct repl_ctx *current_ctx) {
   }
 }
 
-void init_sig_handler() {
+int init_sig_handler() {
   struct sigaction sa;
   memset(&sa, 0, sizeof(sa));
   sa.sa_handler = handler;
-  sigaction(SIGINT, &sa, NULL);
+  if (sigaction(SIGINT, &sa, NULL) == -1) {
+    perror(program_name);
+    return 1;
+  }
+  return 0;
 }
 
 void init_current_ctx(struct repl_ctx *current_ctx) {
@@ -81,7 +86,9 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  init_sig_handler();
+  if (init_sig_handler() == 1) {
+    exit(EXIT_FAILURE);
+  }
 
   srand(time(NULL));
 
@@ -89,7 +96,7 @@ int main(int argc, char *argv[]) {
   current_ctx.input = NULL;
   bool teasing_current_command = true;
   while (current_ctx.receiving) {
-    if (prompt_loop(&current_ctx)) {
+    if (prompt_loop(&current_ctx) == 1) {
       cleanup_ctx(&current_ctx);
       close_history(hist_file);
       exit(EXIT_FAILURE);

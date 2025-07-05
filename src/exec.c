@@ -24,7 +24,7 @@ int cd(struct repl_ctx *current_ctx) {
   }
 
   if (chdir(current_ctx->command[1]) == -1) {
-    perror("clowniSH");
+    perror(program_name);
     fprintf(stderr, blame_user_msg, current_ctx->user);
   }
 
@@ -134,7 +134,7 @@ int exec(struct repl_ctx *current_ctx) {
     }
 
     if (execvp(current_ctx->command[0], current_ctx->command) == -1) {
-      perror("clowniSH");
+      perror(program_name);
       exit(EXIT_FAILURE);
     }
   }

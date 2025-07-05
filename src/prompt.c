@@ -4,11 +4,14 @@
 
 int construct_prompt(char **prompt, char *home_dir, char *user) {
   char hostname[_SC_HOST_NAME_MAX];
-  gethostname(hostname, _SC_HOST_NAME_MAX);
+  if (gethostname(hostname, _SC_HOST_NAME_MAX) == -1) {
+    perror(program_name);
+    return 1;
+  }
 
   char *cwd = malloc(PATH_MAX);
   if (!getcwd(cwd, PATH_MAX)) {
-    perror("clowniSH: ");
+    perror(program_name);
     return 1;
   }
 

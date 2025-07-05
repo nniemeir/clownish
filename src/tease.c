@@ -25,7 +25,7 @@ void tease_roll(struct repl_ctx *current_ctx) {
   tease_desktop();
 }
 
-int program_is_blacklisted(const char *program_name) {
+bool program_is_blacklisted(const char *program_name) {
   static const struct joke blacklisted_programs[NUM_OF_BLACKLISTED_PROGRAMS] = {
       {"emacs", "No, use vim."},
       {"neofetch", "Do we really need another minimalist cyberpunk anime "
@@ -35,10 +35,10 @@ int program_is_blacklisted(const char *program_name) {
   for (int i = 0; i < NUM_OF_BLACKLISTED_PROGRAMS; i++) {
     if (strcmp(program_name, blacklisted_programs[i].name) == 0) {
       printf("%s\n", blacklisted_programs[i].comment);
-      return 1;
+      return true;
     }
   }
-  return 0;
+  return false;
 }
 
 void joke_binary_search(const struct joke *known_x, unsigned int array_size,

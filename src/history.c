@@ -9,12 +9,17 @@ char *init_history(char *home_dir) {
   }
   snprintf(hist_file, PATH_MAX, "%s/.clown_scribbles", home_dir);
   using_history();
-  read_history(hist_file);
+  if (read_history(hist_file) != 0) {
+    perror(program_name);
+    return NULL;
+  }
   return hist_file;
 }
 
 void close_history(char *hist_file) {
-  write_history(hist_file);
+  if (write_history(hist_file) != 0) {
+    perror(program_name);
+  }
   free(hist_file);
   clear_history();
 }

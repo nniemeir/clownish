@@ -2,6 +2,7 @@
 #define TEASE_H
 
 #include "parse.h"
+#include "stdbool.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +25,7 @@ struct joke {
 
 extern int teasing_enabled;
 
-int program_is_blacklisted(const char *program_name);
+bool program_is_blacklisted(const char *program_name);
 void tease_roll(struct repl_ctx *current_ctx);
 void tease_desktop(void);
 void tease_distro(void);

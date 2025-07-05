@@ -7,4 +7,6 @@ const char *env_fail_msg =
 
 const char *malloc_fail_msg = "Malloc failed for %s, take cover!";
 
+const char *program_name = "clowniSH";
+
 const char *program_not_found_msg = "Nope, not seeing that anywhere.\n";
