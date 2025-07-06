@@ -5,20 +5,20 @@
 int construct_prompt(char **prompt, char *home_dir, char *user) {
   char hostname[_SC_HOST_NAME_MAX];
   if (gethostname(hostname, _SC_HOST_NAME_MAX) == -1) {
-    perror(program_name);
+    error_msg("Failed to get hostname", true);
     return 1;
   }
 
   char *cwd = malloc(PATH_MAX);
   if (!getcwd(cwd, PATH_MAX)) {
-    perror(program_name);
+    error_msg("Failed to get current working directory", true);
     return 1;
   }
 
   replace(&cwd, home_dir, "~");
 
-  snprintf(*prompt, PROMPT_MAX, "%s[%s@%s] %s%s%s ", RED, user, hostname, YEL,
-           cwd, WHT);
+  snprintf(*prompt, PROMPT_MAX, "%s[%s@%s] %s%s%s ", RED, user, hostname,
+           YELLOW, cwd, CYAN);
 
   free(cwd);
   return 0;
@@ -27,7 +27,7 @@ int construct_prompt(char **prompt, char *home_dir, char *user) {
 int prompt_loop(struct repl_ctx *current_ctx) {
   char *prompt = malloc(PROMPT_MAX);
   if (!prompt) {
-    fprintf(stderr, malloc_fail_msg, "prompt");
+    error_msg(malloc_fail_msg, true);
     return 1;
   }
 
@@ -58,25 +58,25 @@ int prompt_loop(struct repl_ctx *current_ctx) {
   current_ctx->in_stream_name =
       malloc(current_ctx->commands_count * sizeof(char *));
   if (!current_ctx->in_stream_name) {
-    fprintf(stderr, malloc_fail_msg, "in_stream_name");
+    error_msg(malloc_fail_msg, true);
     return 1;
   }
   current_ctx->in_stream_type =
       malloc(current_ctx->commands_count * sizeof(unsigned int));
   if (!current_ctx->in_stream_type) {
-    fprintf(stderr, malloc_fail_msg, "in_stream_type");
+    error_msg(malloc_fail_msg, true);
     return 1;
   }
   current_ctx->out_stream_name =
       malloc(current_ctx->commands_count * sizeof(char *));
   if (!current_ctx->out_stream_name) {
-    fprintf(stderr, malloc_fail_msg, "out_stream_name");
+    error_msg(malloc_fail_msg, true);
     return 1;
   }
   current_ctx->out_stream_type =
       malloc(current_ctx->commands_count * sizeof(unsigned int));
   if (!current_ctx->out_stream_type) {
-    fprintf(stderr, malloc_fail_msg, "out_stream_type");
+    error_msg(malloc_fail_msg, true);
     return 1;
   }
 

@@ -27,7 +27,7 @@ int cd(struct repl_ctx *current_ctx) {
   }
 
   if (chdir(current_ctx->commands[0][1]) == -1) {
-    perror(program_name);
+    error_msg("Failed to change working directory", true);
     fprintf(stderr, blame_user_msg, current_ctx->user);
     return -1;
   }
@@ -103,7 +103,7 @@ int exec(struct repl_ctx *current_ctx) {
   if (pipe_fds) {
     for (unsigned int i = 0; i < current_ctx->commands_count - 1; i++) {
       if (pipe(pipe_fds[i]) == -1) {
-        perror("pipe");
+        error_msg("Failed to create pipe", true);
         free(pipe_fds);
         return 1;
       }
@@ -115,7 +115,7 @@ int exec(struct repl_ctx *current_ctx) {
   for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
     pids[i] = fork();
     if (pids[i] == -1) {
-      fprintf(stderr, "I couldn't fork the process.\n");
+      error_msg("Failed to fork process", true);
       return 1;
     }
 
@@ -127,41 +127,41 @@ int exec(struct repl_ctx *current_ctx) {
       if (pipe_fds) {
         if (i > 0) {
           if (dup2(pipe_fds[i - 1][READ_END], STDIN_FILENO) == -1) {
-            perror("dup2");
+            error_msg(dup2_fail_msg, true);
             if (close(pipe_fds[i - 1][READ_END])) {
-              perror("close");
+              error_msg(close_fail_msg, true);
             }
           }
         }
 
         if (i < current_ctx->commands_count - 1) {
           if (dup2(pipe_fds[i][WRITE_END], STDOUT_FILENO) == -1) {
-            perror("dup2");
+            error_msg(dup2_fail_msg, true);
             if (close(pipe_fds[i][WRITE_END])) {
-              perror("close");
+              error_msg(close_fail_msg, true);
             }
           }
         }
 
         for (unsigned int j = 0; j < current_ctx->commands_count - 1; j++) {
           if (close(pipe_fds[j][READ_END]) == -1) {
-            perror("close");
+            error_msg(close_fail_msg, true);
           }
           if (close(pipe_fds[j][WRITE_END]) == -1) {
-            perror("close");
+            error_msg(close_fail_msg, true);
           }
         }
       }
       if (current_ctx->in_stream_name[i]) {
         int in_fd = open(current_ctx->in_stream_name[i], O_RDONLY);
         if (in_fd == -1) {
-          perror("open");
+          error_msg(open_fail_msg, true);
           exit(EXIT_FAILURE);
         } else {
           if (dup2(in_fd, STDIN_FILENO) == -1) {
-            perror("dup2");
+            error_msg(dup2_fail_msg, true);
             if (close(in_fd)) {
-              perror("close");
+              error_msg(close_fail_msg, true);
             }
           }
         }
@@ -172,20 +172,20 @@ int exec(struct repl_ctx *current_ctx) {
             open(current_ctx->out_stream_name[i],
                  O_WRONLY | current_ctx->out_stream_type[i] | O_CREAT, 0644);
         if (out_fd == -1) {
-          perror("open");
+          error_msg(open_fail_msg, true);
           exit(EXIT_FAILURE);
         } else {
           if (dup2(out_fd, STDOUT_FILENO) == -1) {
-            perror("dup2");
+            error_msg(dup2_fail_msg, true);
           }
           if (close(out_fd)) {
-            perror("close");
+            error_msg(close_fail_msg, true);
           }
         }
       }
 
       if (execvp(current_ctx->commands[i][0], current_ctx->commands[i]) == -1) {
-        perror(program_name);
+        error_msg("Failed to execute process", true);
         exit(EXIT_FAILURE);
       }
     }
@@ -193,10 +193,10 @@ int exec(struct repl_ctx *current_ctx) {
   if (pipe_fds) {
     for (unsigned int i = 0; i < current_ctx->commands_count - 1; i++) {
       if (close(pipe_fds[i][READ_END])) {
-        perror("close");
+        error_msg(close_fail_msg, true);
       }
       if (close(pipe_fds[i][WRITE_END])) {
-        perror("close");
+        error_msg(close_fail_msg, true);
       }
     }
     free(pipe_fds);

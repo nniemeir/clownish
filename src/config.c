@@ -16,7 +16,7 @@ char *get_user_env(const char *var_name, struct user_env *user_envs,
 int load_config(struct repl_ctx *current_ctx) {
   current_ctx->config_filename = malloc(PATH_MAX);
   if (!current_ctx->config_filename) {
-    fprintf(stderr, malloc_fail_msg, "Config file");
+    error_msg(malloc_fail_msg, true);
     return 1;
   }
   snprintf(current_ctx->config_filename, PATH_MAX, "%s/.clownrc",
@@ -30,7 +30,6 @@ int load_config(struct repl_ctx *current_ctx) {
 
   char *config_file_contents = read_file(current_ctx->config_filename);
   if (!config_file_contents) {
-    fprintf(stderr, "Failed to read %s\n", "Config file");
     return 1;
   }
 
@@ -47,7 +46,7 @@ int load_config(struct repl_ctx *current_ctx) {
       malloc(current_ctx->user_envs_count * sizeof(struct user_env));
 
   if (!current_ctx->user_envs) {
-    fprintf(stderr, malloc_fail_msg, "user_envs");
+    error_msg(malloc_fail_msg, true);
     free(config_file_contents);
     return 1;
   }
@@ -63,7 +62,7 @@ int load_config(struct repl_ctx *current_ctx) {
     }
 
     if (strcmp(equal_sign + 1, "=") == 0) {
-      fprintf(stderr, "Malformed configuration file.");
+      error_msg("Malformed configuration file", false);
       free(config_file_contents);
       return 1;
     }
@@ -73,13 +72,13 @@ int load_config(struct repl_ctx *current_ctx) {
 
     current_ctx->user_envs[index].name = malloc(name_len + 1);
     if (!current_ctx->user_envs[index].name) {
-      fprintf(stderr, malloc_fail_msg, "user_env name");
+      error_msg(malloc_fail_msg, true);
       free(config_file_contents);
       return 1;
     }
     current_ctx->user_envs[index].value = malloc(value_len + 1);
     if (!current_ctx->user_envs[index].value) {
-      fprintf(stderr, malloc_fail_msg, "user_env value");
+      error_msg(malloc_fail_msg, true);
       free(current_ctx->user_envs[index].name);
       free(config_file_contents);
       return 1;

@@ -88,7 +88,7 @@ void tease_desktop(void) {
 
   char *desktop = getenv("XDG_CURRENT_DESKTOP");
   if (!desktop) {
-    fprintf(stderr, env_fail_msg, "XDG_CURRENT_DESKTOP");
+    error_msg(env_fail_msg, false);
     return;
   }
 
@@ -268,7 +268,7 @@ void tease_kernel(void) {
 
   struct utsname buffer;
   if (uname(&buffer) == -1) {
-    perror("uname");
+    error_msg("Failed to retrieve kernel information", true);
   }
 
   char *is_lts = strstr(buffer.release, "lts");
@@ -352,7 +352,7 @@ void tease_terminal(void) {
   called = 1;
   const char *term = getenv("TERM");
   if (!term) {
-    fprintf(stderr, env_fail_msg, term);
+    error_msg(env_fail_msg, false);
   }
 
   static const struct joke known_terminals[NUM_OF_KNOWN_TERMINALS] = {

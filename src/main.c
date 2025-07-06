@@ -88,7 +88,7 @@ int init_sig_handler() {
   memset(&sa, 0, sizeof(sa));
   sa.sa_handler = handler;
   if (sigaction(SIGINT, &sa, NULL) == -1) {
-    perror(program_name);
+    error_msg("Failed to configure signal handling", true);
     return 1;
   }
   return 0;
@@ -107,8 +107,9 @@ void init_current_ctx(struct repl_ctx *current_ctx) {
 
 int main(int argc, char *argv[]) {
   if (geteuid() == 0) {
-    fprintf(stderr,
-            "Running this as root? I cannot sanction your buffoonery.\n");
+    error_msg("You attempted to run this shell as root, I cannot sanction your "
+              "buffoonery.\n",
+              false);
     exit(EXIT_FAILURE);
   }
 
@@ -144,12 +145,20 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
+    bool nested_continue = false;
+
     for (unsigned int i = 0; i < current_ctx.commands_count; i++) {
       if (program_is_blacklisted(current_ctx.commands[i][0])) {
         cleanup_ctx(&current_ctx);
-        continue;
+        nested_continue = true;
+        break;
       }
     }
+
+    if (nested_continue) {
+      continue;
+    }
+
     if (exec(&current_ctx) == 1) {
       cleanup_ctx(&current_ctx);
       continue;

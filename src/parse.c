@@ -4,19 +4,18 @@
 
 static const char *delim = " \t\r\n\a";
 
+#define ERR_MSG_MAX 2048
+
 void remove_arg(char **command, unsigned int *args_count,
                 unsigned int arg_index) {
   if (arg_index == 0) {
-    fprintf(stderr, "Do you really think passing a command to execvp "
-                    "without a command name is a good idea?\n");
+    error_msg("You tried to remove the program name from a command", false);
     return;
   }
 
   if (arg_index >= *args_count) {
-    fprintf(stderr,
-            "You can't remove the %uth element of an array with only %u "
-            "elements.\n",
-            arg_index, *args_count - 1);
+    error_msg("You attempted to remove more elements from an array than it had",
+              false);
     return;
   }
 
@@ -45,7 +44,7 @@ void replace(char **original_str, const char *original_substr,
 
   char *new_str = malloc(new_str_len);
   if (!new_str) {
-    fprintf(stderr, malloc_fail_msg, "new_str");
+    error_msg(malloc_fail_msg, true);
     return;
   }
 
@@ -73,7 +72,9 @@ void determine_if_background(struct repl_ctx *current_ctx,
                                   [current_ctx->args_count[command_index] - 1],
              "&") == 0) {
     if (command_index - 1 != current_ctx->commands_count) {
-      fprintf(stderr, "%s: Syntax error", program_name);
+      error_msg("Background operator can only be specified for the last "
+                "command in the pipeline.",
+                false);
       return;
     }
     current_ctx->is_background_process = 1;
@@ -88,14 +89,13 @@ void determine_in_stream(struct repl_ctx *current_ctx,
   for (unsigned int i = 0; i < current_ctx->args_count[command_index]; i++) {
     if (strcmp(current_ctx->commands[command_index][i], "<") == 0) {
       if (!current_ctx->commands[command_index][i + 1]) {
-        fprintf(stderr, "%s: No filename provided for redirection.\n",
-                program_name);
+        error_msg(redirection_missing_filename_msg, false);
         return;
       }
       current_ctx->in_stream_name[command_index] =
           strdup(current_ctx->commands[command_index][i + 1]);
       if (!current_ctx->in_stream_name[command_index]) {
-        fprintf(stderr, malloc_fail_msg, "in_stream_name");
+        error_msg("Failed to duplicate string", true);
         return;
       }
 
@@ -114,15 +114,14 @@ void determine_out_stream(struct repl_ctx *current_ctx,
   for (unsigned int i = 0; i < current_ctx->args_count[command_index]; i++) {
     if (strcmp(current_ctx->commands[command_index][i], ">") == 0) {
       if (!current_ctx->commands[command_index][i + 1]) {
-        fprintf(stderr, "%s: No filename provided for redirection.\n",
-                program_name);
+        error_msg(redirection_missing_filename_msg, false);
         return;
       }
       current_ctx->out_stream_type[command_index] = O_WRONLY;
       current_ctx->out_stream_name[command_index] =
           strdup(current_ctx->commands[command_index][i + 1]);
       if (!current_ctx->out_stream_name[command_index]) {
-        fprintf(stderr, malloc_fail_msg, "out_stream_name");
+        error_msg("Failed to duplicate string", true);
         return;
       }
       // Called twice to remove gt and the stream name
@@ -135,15 +134,14 @@ void determine_out_stream(struct repl_ctx *current_ctx,
 
     if (strcmp(current_ctx->commands[command_index][i], ">>") == 0) {
       if (!current_ctx->commands[command_index][i + 1]) {
-        fprintf(stderr, "%s: No filename provided for redirection.\n",
-                program_name);
+        error_msg(redirection_missing_filename_msg, false);
         return;
       }
       current_ctx->out_stream_type[command_index] = O_APPEND;
       current_ctx->out_stream_name[command_index] =
           strdup(current_ctx->commands[command_index][i + 1]);
       if (!current_ctx->out_stream_name[command_index]) {
-        fprintf(stderr, malloc_fail_msg, "in_stream_name");
+        error_msg("Failed to duplicate string", true);
         return;
       }
       remove_arg(current_ctx->commands[command_index],
@@ -176,14 +174,14 @@ void parse_envs(char **arg, struct user_env *user_envs,
     }
     env_value = getenv(var_name);
     if (!env_value) {
-      fprintf(stderr, env_fail_msg, var_name);
+      error_msg(env_fail_msg, false);
       env_value = "";
       return;
     }
 
     *arg = strdup(env_value);
     if (!*arg) {
-      fprintf(stderr, "%s: Failed to copy env_value to arg\n", program_name);
+      error_msg("Failed to duplicate string", true);
     }
     return;
   }
@@ -193,7 +191,7 @@ bool pipes_exceeded(const char *line, unsigned int *commands_count) {
   int pipe_count = 0;
   char *temp = strdup(line);
   if (!temp) {
-    fprintf(stderr, "%s: strdup failed for temp", program_name);
+    error_msg("Failed to duplicate string", true);
     return true;
   }
   char *temp_start = temp;
@@ -203,7 +201,7 @@ bool pipes_exceeded(const char *line, unsigned int *commands_count) {
   }
   free(temp_start);
   if (pipe_count >= PIPES_MAX) {
-    fprintf(stderr, "%s: Maximum pipes exceeded.\n", program_name);
+    error_msg("Failed to duplicate string", true);
     return true;
   }
   *commands_count = pipe_count + 1;
@@ -220,6 +218,7 @@ char **split_on_pipes(const char *line, unsigned int *commands_count) {
   }
   char *input = strdup(line);
   if (!input) {
+    error_msg("Failed to duplicate string", true);
     return NULL;
   }
   char *start = input;
@@ -229,6 +228,7 @@ char **split_on_pipes(const char *line, unsigned int *commands_count) {
     *position = '\0';
     unparsed_commands[index] = strdup(start);
     if (!unparsed_commands[index]) {
+      error_msg("Failed to duplicate string", true);
       free(input);
       for (int i = index - 1; i >= 0; i--) {
         free(unparsed_commands[i]);
@@ -245,6 +245,7 @@ char **split_on_pipes(const char *line, unsigned int *commands_count) {
   }
   unparsed_commands[index++] = strdup(start);
   if (!unparsed_commands[index - 1]) {
+    error_msg("Failed to duplicate string", true);
     free(input);
     for (int i = index - 1; i >= 0; i--) {
       free(unparsed_commands[i]);
@@ -261,7 +262,7 @@ char **tokenize_input(char *line, unsigned int *args_count) {
   int buffer_size = TOKENS_MAX;
   char **tokens = malloc(buffer_size * sizeof(char *));
   if (!tokens) {
-    fprintf(stderr, malloc_fail_msg, "token buffer");
+    error_msg(malloc_fail_msg, true);
     return NULL;
   }
 
@@ -271,7 +272,7 @@ char **tokenize_input(char *line, unsigned int *args_count) {
   while (token) {
     tokens[*args_count] = strdup(token);
     if (!tokens[*args_count]) {
-      fprintf(stderr, "strdup failed for tokens[%d]", *args_count);
+      error_msg("Failed to duplicate string", true);
       for (unsigned int i = 0; i < *args_count; i++) {
         free(tokens[i]);
       }
@@ -285,7 +286,7 @@ char **tokenize_input(char *line, unsigned int *args_count) {
       tokens = realloc(tokens, buffer_size * sizeof(char *));
 
       if (!tokens) {
-        fprintf(stderr, malloc_fail_msg, "token buffer");
+        error_msg("Failed to reallocate memory", true);
         return NULL;
       }
     }
