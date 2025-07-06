@@ -39,7 +39,41 @@ void process_args(int argc, char *argv[]) {
 void cleanup_ctx(struct repl_ctx *current_ctx) {
   // Allocation of args only occurs if the string is not empty
   if (current_ctx->input[0] != '\0') {
-    free(current_ctx->command);
+    for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
+      if (current_ctx->commands[i]) {
+        free(current_ctx->commands[i]);
+      }
+      if (current_ctx->in_stream_name[i]) {
+        free(current_ctx->in_stream_name[i]);
+      }
+      if (current_ctx->out_stream_name[i]) {
+        free(current_ctx->out_stream_name[i]);
+      }
+      if (current_ctx->unparsed_commands[i]) {
+        free(current_ctx->unparsed_commands[i]);
+      }
+    }
+    if (current_ctx->out_stream_name) {
+      free(current_ctx->out_stream_name);
+    }
+    if (current_ctx->out_stream_type) {
+      free(current_ctx->out_stream_type);
+    }
+    if (current_ctx->args_count) {
+      free(current_ctx->args_count);
+    }
+    if (current_ctx->commands) {
+      free(current_ctx->commands);
+    }
+    if (current_ctx->in_stream_name) {
+      free(current_ctx->in_stream_name);
+    }
+    if (current_ctx->in_stream_type) {
+      free(current_ctx->in_stream_type);
+    }
+    if (current_ctx->unparsed_commands) {
+      free(current_ctx->unparsed_commands);
+    }
   }
   if (current_ctx->input) {
     free(current_ctx->input);
@@ -107,21 +141,23 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    if (program_is_blacklisted(current_ctx.command[0])) {
-      cleanup_ctx(&current_ctx);
-      continue;
+    for (unsigned int i = 0; i < current_ctx.commands_count; i++) {
+      if (program_is_blacklisted(current_ctx.commands[i][0])) {
+        cleanup_ctx(&current_ctx);
+        continue;
+      }
     }
-
     if (exec(&current_ctx) == 1) {
       cleanup_ctx(&current_ctx);
       continue;
     }
-
-    if (teasing_enabled && current_ctx.command[0][0] != '\0') {
-      if (teasing_current_command) {
-        tease_roll(&current_ctx);
+    for (unsigned int j = 0; j < current_ctx.commands_count; j++) {
+      if (teasing_enabled && current_ctx.commands[j][0][0] != '\0') {
+        if (teasing_current_command) {
+          tease_roll(&current_ctx, j);
+        }
+        teasing_current_command = !teasing_current_command;
       }
-      teasing_current_command = !teasing_current_command;
     }
 
     cleanup_ctx(&current_ctx);

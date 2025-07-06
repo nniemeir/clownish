@@ -4,14 +4,14 @@
 
 int teasing_enabled = 1;
 
-void tease_roll(struct repl_ctx *current_ctx) {
+void tease_roll(struct repl_ctx *current_ctx, unsigned int command_index) {
   int rd_num_2 = rand() % (100 - 0 + 1) + 0;
   if (rd_num_2 <= 20) {
     tease_distro();
     return;
   }
   if (rd_num_2 <= 40) {
-    tease_program(current_ctx->command[0]);
+    tease_program(current_ctx->commands[command_index][0]);
     return;
   }
   if (rd_num_2 <= 60) {

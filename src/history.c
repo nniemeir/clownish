@@ -11,6 +11,7 @@ char *init_history(char *home_dir) {
   using_history();
   if (read_history(hist_file) != 0) {
     perror(program_name);
+    free(hist_file);
     return NULL;
   }
   return hist_file;

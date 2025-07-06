@@ -19,11 +19,11 @@ int cat(struct repl_ctx *current_ctx) {
 }
 
 int cd(struct repl_ctx *current_ctx) {
-  if (!current_ctx->command[1]) {
-    current_ctx->command[1] = current_ctx->home_dir;
+  if (!current_ctx->commands[0][1]) {
+    current_ctx->commands[0][1] = current_ctx->home_dir;
   }
 
-  if (chdir(current_ctx->command[1]) == -1) {
+  if (chdir(current_ctx->commands[0][1]) == -1) {
     perror(program_name);
     fprintf(stderr, blame_user_msg, current_ctx->user);
   }
@@ -70,7 +70,7 @@ int exec_builtin(struct repl_ctx *current_ctx) {
       {"exit", exit_builtin},
       {"help", help}};
   for (int i = 0; i < NUM_OF_BUILTINS; i++) {
-    if (strcmp(current_ctx->command[0], built_ins[i].command_name) == 0) {
+    if (strcmp(current_ctx->commands[0][0], built_ins[i].command_name) == 0) {
       return built_ins[i].command_function(current_ctx);
     }
   }
@@ -86,56 +86,58 @@ int exec(struct repl_ctx *current_ctx) {
     return 0;
   }
 
-  pid_t pid;
-  int status;
-  pid = fork();
-  if (pid == -1) {
-    fprintf(stderr, "I couldn't fork the process.\n");
-    return 1;
-  }
-
-  // Parent process
-  if (pid > 0 && !current_ctx->is_background_process) {
-    do {
-      waitpid(pid, &status, WUNTRACED);
-    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-  }
-
-  // Child process
-  if (pid == 0) {
-    if (current_ctx->is_background_process) {
-      setpgid(0, 0);
+  for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
+    pid_t pid;
+    int status;
+    pid = fork();
+    if (pid == -1) {
+      fprintf(stderr, "I couldn't fork the process.\n");
+      return 1;
     }
 
-    if (current_ctx->in_stream_name[0] != '\0') {
-      int in_fd = open(current_ctx->in_stream_name, O_RDONLY);
-      if (in_fd == -1) {
-        perror("open");
-      } else {
-        if (dup2(in_fd, fileno(stdin)) == -1) {
-          perror("dup2");
-          close(in_fd);
+    // Parent process
+    if (pid > 0 && !current_ctx->is_background_process) {
+      do {
+        waitpid(pid, &status, WUNTRACED);
+      } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+    }
+
+    // Child process
+    if (pid == 0) {
+      if (current_ctx->is_background_process) {
+        setpgid(0, 0);
+      }
+
+      if (current_ctx->in_stream_name[i]) {
+        int in_fd = open(current_ctx->in_stream_name[i], O_RDONLY);
+        if (in_fd == -1) {
+          perror("open");
+        } else {
+          if (dup2(in_fd, STDIN_FILENO) == -1) {
+            perror("dup2");
+            close(in_fd);
+          }
         }
       }
-    }
 
-    if (current_ctx->out_stream_name[0] != '\0') {
-      int out_fd =
-          open(current_ctx->out_stream_name,
-               O_WRONLY | current_ctx->out_stream_type | O_CREAT, 0644);
-      if (out_fd == -1) {
-        perror("open");
-      } else {
-        if (dup2(out_fd, fileno(stdout)) == -1) {
-          perror("dup2");
+      if (current_ctx->out_stream_name[i]) {
+        int out_fd =
+            open(current_ctx->out_stream_name[i],
+                 O_WRONLY | current_ctx->out_stream_type[i] | O_CREAT, 0644);
+        if (out_fd == -1) {
+          perror("open");
+        } else {
+          if (dup2(out_fd, STDOUT_FILENO) == -1) {
+            perror("dup2");
+          }
+          close(out_fd);
         }
-        close(out_fd);
       }
-    }
 
-    if (execvp(current_ctx->command[0], current_ctx->command) == -1) {
-      perror(program_name);
-      exit(EXIT_FAILURE);
+      if (execvp(current_ctx->commands[i][0], current_ctx->commands[i]) == -1) {
+        perror(program_name);
+        exit(EXIT_FAILURE);
+      }
     }
   }
   return 0;

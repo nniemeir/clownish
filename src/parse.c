@@ -66,55 +66,90 @@ void replace(char **original_str, const char *original_substr,
   free(new_str);
 }
 
-void determine_if_background(struct repl_ctx *current_ctx) {
+void determine_if_background(struct repl_ctx *current_ctx,
+                             unsigned int command_index) {
   current_ctx->is_background_process = 0;
-  if (strcmp(current_ctx->command[current_ctx->args_count - 1], "&") == 0) {
+  if (strcmp(current_ctx->commands[command_index]
+                                  [current_ctx->args_count[command_index] - 1],
+             "&") == 0) {
+    if (command_index - 1 != current_ctx->commands_count) {
+      fprintf(stderr, "%s: Syntax error", program_name);
+      return;
+    }
     current_ctx->is_background_process = 1;
-    remove_arg(current_ctx->command, &current_ctx->args_count,
-               current_ctx->args_count - 1);
+    remove_arg(current_ctx->commands[command_index],
+               &current_ctx->args_count[command_index],
+               current_ctx->args_count[command_index] - 1);
   }
 }
 
-void determine_in_stream(struct repl_ctx *current_ctx) {
-  current_ctx->in_stream_type = 0;
-  strcpy(current_ctx->in_stream_name, "");
+void determine_in_stream(struct repl_ctx *current_ctx,
+                         unsigned int command_index) {
+  for (unsigned int i = 0; i < current_ctx->args_count[command_index]; i++) {
+    if (strcmp(current_ctx->commands[command_index][i], "<") == 0) {
+      if (!current_ctx->commands[command_index][i + 1]) {
+        fprintf(stderr, "%s: No filename provided for redirection.\n",
+                program_name);
+        return;
+      }
+      current_ctx->in_stream_name[command_index] =
+          strdup(current_ctx->commands[command_index][i + 1]);
+      if (!current_ctx->in_stream_name[command_index]) {
+        fprintf(stderr, malloc_fail_msg, "in_stream_name");
+        return;
+      }
 
-  char *lt;
-  for (unsigned int i = 0; i < current_ctx->args_count; i++) {
-    lt = strstr(current_ctx->command[i], "<");
-    if (lt) {
-      strcpy(current_ctx->in_stream_name, current_ctx->command[i + 1]);
       // Called twice to remove lt and the stream name
-      remove_arg(current_ctx->command, &current_ctx->args_count, i);
-      remove_arg(current_ctx->command, &current_ctx->args_count, i);
+      remove_arg(current_ctx->commands[command_index],
+                 &current_ctx->args_count[command_index], i);
+      remove_arg(current_ctx->commands[command_index],
+                 &current_ctx->args_count[command_index], i);
       return;
     }
   }
 }
 
-void determine_out_stream(struct repl_ctx *current_ctx) {
-  current_ctx->out_stream_type = 0;
-  strcpy(current_ctx->out_stream_name, "");
-
-  char *gt;
-  char *two_gt;
-  for (unsigned int i = 0; i < current_ctx->args_count; i++) {
-    gt = strstr(current_ctx->command[i], ">");
-    if (gt) {
-      current_ctx->out_stream_type = O_WRONLY;
-      strcpy(current_ctx->out_stream_name, current_ctx->command[i + 1]);
+void determine_out_stream(struct repl_ctx *current_ctx,
+                          unsigned int command_index) {
+  for (unsigned int i = 0; i < current_ctx->args_count[command_index]; i++) {
+    if (strcmp(current_ctx->commands[command_index][i], ">") == 0) {
+      if (!current_ctx->commands[command_index][i + 1]) {
+        fprintf(stderr, "%s: No filename provided for redirection.\n",
+                program_name);
+        return;
+      }
+      current_ctx->out_stream_type[command_index] = O_WRONLY;
+      current_ctx->out_stream_name[command_index] =
+          strdup(current_ctx->commands[command_index][i + 1]);
+      if (!current_ctx->out_stream_name[command_index]) {
+        fprintf(stderr, malloc_fail_msg, "out_stream_name");
+        return;
+      }
       // Called twice to remove gt and the stream name
-      remove_arg(current_ctx->command, &current_ctx->args_count, i);
-      remove_arg(current_ctx->command, &current_ctx->args_count, i);
+      remove_arg(current_ctx->commands[command_index],
+                 &current_ctx->args_count[command_index], i);
+      remove_arg(current_ctx->commands[command_index],
+                 &current_ctx->args_count[command_index], i);
       return;
     }
 
-    two_gt = strstr(current_ctx->command[i], ">>");
-    if (two_gt) {
-      current_ctx->out_stream_type = O_APPEND;
-      strcpy(current_ctx->out_stream_name, current_ctx->command[i + 1]);
-      remove_arg(current_ctx->command, &current_ctx->args_count, i);
-      remove_arg(current_ctx->command, &current_ctx->args_count, i);
+    if (strcmp(current_ctx->commands[command_index][i], ">>") == 0) {
+      if (!current_ctx->commands[command_index][i + 1]) {
+        fprintf(stderr, "%s: No filename provided for redirection.\n",
+                program_name);
+        return;
+      }
+      current_ctx->out_stream_type[command_index] = O_APPEND;
+      current_ctx->out_stream_name[command_index] =
+          strdup(current_ctx->commands[command_index][i + 1]);
+      if (!current_ctx->out_stream_name[command_index]) {
+        fprintf(stderr, malloc_fail_msg, "in_stream_name");
+        return;
+      }
+      remove_arg(current_ctx->commands[command_index],
+                 &current_ctx->args_count[command_index], i);
+      remove_arg(current_ctx->commands[command_index],
+                 &current_ctx->args_count[command_index], i);
       return;
     }
   }
@@ -143,10 +178,82 @@ void parse_envs(char **arg, struct user_env *user_envs,
     if (!env_value) {
       fprintf(stderr, env_fail_msg, var_name);
       env_value = "";
+      return;
     }
-    *arg = env_value;
+
+    *arg = strdup(env_value);
+    if (!*arg) {
+      fprintf(stderr, "%s: Failed to copy env_value to arg\n", program_name);
+    }
     return;
   }
+}
+
+bool pipes_exceeded(const char *line) {
+int pipe_count = 0;
+  char *temp = strdup(line);
+  if (!temp) {
+    fprintf(stderr, "%s: strdup failed for temp", program_name);
+    return true;
+  }
+  char *temp_start = temp;
+  while ((temp = strstr(temp, " | "))) {
+    pipe_count++;
+    temp += 3;
+  }
+  free(temp_start);
+  if (pipe_count >= PIPES_MAX) {
+    fprintf(stderr, "%s: Maximum pipes exceeded.\n", program_name);
+    return true;
+  }
+  return false;
+}
+
+char **split_on_pipes(const char *line, unsigned int *commands_count) {
+  if (pipes_exceeded(line)) {
+    return NULL;
+  } 
+  char **unparsed_commands = malloc(PIPES_MAX * sizeof(char *));
+  if (!unparsed_commands) {
+    return NULL;
+  }
+  char *input = strdup(line);
+  if (!input) {
+    return NULL;
+  }
+  char *start = input;
+  char *position;
+  unsigned int index = 0;
+  while ((position = strstr(start, " | ")) && index < PIPES_MAX) {
+    *position = '\0';
+    unparsed_commands[index] = strdup(start);
+    if (!unparsed_commands[index]) {
+      free(input);
+      for (int i = index - 1; i >= 0; i--) {
+        free(unparsed_commands[i]);
+      }
+      free(unparsed_commands);
+      return NULL;
+    }
+    start = position + 3;
+    index++;
+  }
+  if (index == PIPES_MAX) {
+    free(input);
+    return NULL;
+  }
+  unparsed_commands[index++] = strdup(start);
+  if (!unparsed_commands[index - 1]) {
+    free(input);
+    for (int i = index - 1; i >= 0; i--) {
+      free(unparsed_commands[i]);
+    }
+    free(unparsed_commands);
+    return NULL;
+  }
+  *commands_count = index;
+  free(input);
+  return unparsed_commands;
 }
 
 char **tokenize_input(char *line, unsigned int *args_count) {
