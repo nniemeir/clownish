@@ -41,16 +41,19 @@ void cleanup_ctx(struct repl_ctx *current_ctx) {
   if (current_ctx->input[0] != '\0') {
     for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
       if (current_ctx->commands[i]) {
+        for (unsigned int j = 0; j < current_ctx->args_count[i]; j++) {
+          free(current_ctx->commands[i][j]);
+        }
         free(current_ctx->commands[i]);
+      }
+      if (current_ctx->unparsed_commands[i]) {
+        free(current_ctx->unparsed_commands[i]);
       }
       if (current_ctx->in_stream_name[i]) {
         free(current_ctx->in_stream_name[i]);
       }
       if (current_ctx->out_stream_name[i]) {
         free(current_ctx->out_stream_name[i]);
-      }
-      if (current_ctx->unparsed_commands[i]) {
-        free(current_ctx->unparsed_commands[i]);
       }
     }
     if (current_ctx->out_stream_name) {

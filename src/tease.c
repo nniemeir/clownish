@@ -5,20 +5,20 @@
 int teasing_enabled = 1;
 
 void tease_roll(struct repl_ctx *current_ctx, unsigned int command_index) {
-  int rd_num_2 = rand() % (100 - 0 + 1) + 0;
-  if (rd_num_2 <= 20) {
+  const int random_num = rand() % 101;
+  if (random_num <= 20) {
     tease_distro();
     return;
   }
-  if (rd_num_2 <= 40) {
+  if (random_num <= 40) {
     tease_program(current_ctx->commands[command_index][0]);
     return;
   }
-  if (rd_num_2 <= 60) {
+  if (random_num <= 60) {
     tease_kernel();
     return;
   }
-  if (rd_num_2 <= 80) {
+  if (random_num <= 80) {
     tease_terminal();
     return;
   }
@@ -145,13 +145,16 @@ void tease_desktop(void) {
       {"theDesk", GENERIC_XWM_MSG},
       {"tinywm", "Are you sure this shell is minimal enough for you?"},
       {"trinity", GENERIC_XWM_MSG},
-      {"ukui", "Your desktop environment looks like a movie mock-up of Windows 7."},
+      {"ukui",
+       "Your desktop environment looks like a movie mock-up of Windows 7."},
       {"Unity", "Unity? It's okay, you can move on."},
-      {"windowmaker", "You don't have to use Window Maker, this isn't PS2 Linux."},
+      {"windowmaker",
+       "You don't have to use Window Maker, this isn't PS2 Linux."},
       {"wingo", "wingo? Don't you know its in maintenance mode?"},
       {"worm", "No keyboard mapper?"},
       {"xfce", "XFCE? Booooring"},
-      {"xmonad", "Did you learn a whole programming language just to configure your WM?"}};
+      {"xmonad", "Did you learn a whole programming language just to configure "
+                 "your WM?"}};
   joke_binary_search(known_desktops, NUM_OF_KNOWN_DESKTOPS, desktop);
 }
 
@@ -289,7 +292,8 @@ void tease_program(const char *program_name) {
       {"audacity", "At least someone is listening to your recordings."},
       {"bleachbit", "Pray that your email server isn't being audited."},
       {"brasero", "What is this ancient technology?"},
-      {"clamscan", "Signature-based detection will surely hold up against zero days."},
+      {"clamscan",
+       "Signature-based detection will surely hold up against zero days."},
       {"code", "EEE, MICROSOFT BAD."},
       {"discord", "Make sure to enable application privacy before doing any "
                   "independent research."},
@@ -300,14 +304,17 @@ void tease_program(const char *program_name) {
       {"hashcat", ETHICAL_QUESTIONING_MSG},
       {"john", ETHICAL_QUESTIONING_MSG},
       {"lutris", "Lutris, a launcher for your launchers."},
-      {"lynx", "Nice, you can browse the two websites that don't require Javascript."},
+      {"lynx",
+       "Nice, you can browse the two websites that don't require Javascript."},
       {"mc", "The 90s were a long time ago."},
       {"nano", "Baby's first text editor."},
       {"ncmpcpp", "How long did it take to configure that?"},
-      {"nix", "Make sure to tell everyone you know about Nix, they'll really appreciate it."},
+      {"nix", "Make sure to tell everyone you know about Nix, they'll really "
+              "appreciate it."},
       {"nmap", "Did your neighbors get into the network again?"},
       {"nvim", "Did Brodie or the Primeagen send you?"},
-      {"pandoc", "Have those hours spent writing LaTeX made you any better at math?"},
+      {"pandoc",
+       "Have those hours spent writing LaTeX made you any better at math?"},
       {"pcsx2", "Feel old yet?"},
       {"ranger", "Ah I see, commands are just too hard for you."},
       {"retroarch", "Ah yes, the systemd of emulators."},
@@ -323,12 +330,14 @@ void tease_program(const char *program_name) {
       {"valgrind", "You couldn't just program it right the first time?"},
       {"virt-manager", "Real Linux chads write their QEMU scripts themselves."},
       {"vlc", "Do you really need all that functionality to watch Anime?"},
-      {"waybar", "I'm sure all the modules you're using are deeply important to have on-screen constantly."},
+      {"waybar", "I'm sure all the modules you're using are deeply important "
+                 "to have on-screen constantly."},
       {"wine", "How dare you run that heathen proprietary software."},
       {"wireshark",
        "Why bother? You don't understand any of the packet fields anyway."},
       {"zenmap", "Is the CLI too hard for you?"},
-      {"zoom", "You might as well just livestream your webcam to the internet."}};
+      {"zoom",
+       "You might as well just livestream your webcam to the internet."}};
 
   joke_binary_search(known_programs, NUM_OF_KNOWN_PROGRAMS, program_name);
 }

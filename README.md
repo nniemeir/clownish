@@ -10,6 +10,7 @@ The views expressed by this shell are not my own, they are inspired by comments 
 * Built-in commands (cd, exit, help)
 * Background command execution
 * Resolves environment variables
+* Pipes
 * Input stream redirection
 * Output stream redirection
 	* Write mode (>)

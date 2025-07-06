@@ -1,14 +1,17 @@
 #include "exec.h"
 #include "error.h"
 #include "tease.h"
+#include <unistd.h>
+
+enum { READ_END, WRITE_END };
 
 int cat(struct repl_ctx *current_ctx) {
   if (!teasing_enabled) {
     return 0;
   }
 
-  const int rd_num = rand() % (100 - 0 + 1) + 0;
-  if (rd_num <= 10) {
+  const int random_num = rand() % 101;
+  if (random_num <= 10) {
     printf(" /\\_/\\\n");
     printf("( o.o )\n");
     printf(" > ^ <\n");
@@ -26,6 +29,7 @@ int cd(struct repl_ctx *current_ctx) {
   if (chdir(current_ctx->commands[0][1]) == -1) {
     perror(program_name);
     fprintf(stderr, blame_user_msg, current_ctx->user);
+    return -1;
   }
 
   return 1;
@@ -86,36 +90,79 @@ int exec(struct repl_ctx *current_ctx) {
     return 0;
   }
 
+  int(*pipe_fds)[2] = NULL;
+
+  if (current_ctx->commands_count > 1) {
+    pipe_fds = malloc((current_ctx->commands_count - 1) * sizeof(int[2]));
+    if (!pipe_fds) {
+      fprintf(stderr, malloc_fail_msg, program_name);
+      return 1;
+    }
+  }
+
+  if (pipe_fds) {
+    for (unsigned int i = 0; i < current_ctx->commands_count - 1; i++) {
+      if (pipe(pipe_fds[i]) == -1) {
+        perror("pipe");
+        free(pipe_fds);
+        return 1;
+      }
+    }
+  }
+
+  pid_t pids[current_ctx->commands_count];
+  int status;
   for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
-    pid_t pid;
-    int status;
-    pid = fork();
-    if (pid == -1) {
+    pids[i] = fork();
+    if (pids[i] == -1) {
       fprintf(stderr, "I couldn't fork the process.\n");
       return 1;
     }
 
-    // Parent process
-    if (pid > 0 && !current_ctx->is_background_process) {
-      do {
-        waitpid(pid, &status, WUNTRACED);
-      } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-    }
-
     // Child process
-    if (pid == 0) {
+    if (pids[i] == 0) {
       if (current_ctx->is_background_process) {
         setpgid(0, 0);
       }
+      if (pipe_fds) {
+        if (i > 0) {
+          if (dup2(pipe_fds[i - 1][READ_END], STDIN_FILENO) == -1) {
+            perror("dup2");
+            if (close(pipe_fds[i - 1][READ_END])) {
+              perror("close");
+            }
+          }
+        }
 
+        if (i < current_ctx->commands_count - 1) {
+          if (dup2(pipe_fds[i][WRITE_END], STDOUT_FILENO) == -1) {
+            perror("dup2");
+            if (close(pipe_fds[i][WRITE_END])) {
+              perror("close");
+            }
+          }
+        }
+
+        for (unsigned int j = 0; j < current_ctx->commands_count - 1; j++) {
+          if (close(pipe_fds[j][READ_END]) == -1) {
+            perror("close");
+          }
+          if (close(pipe_fds[j][WRITE_END]) == -1) {
+            perror("close");
+          }
+        }
+      }
       if (current_ctx->in_stream_name[i]) {
         int in_fd = open(current_ctx->in_stream_name[i], O_RDONLY);
         if (in_fd == -1) {
           perror("open");
+          exit(EXIT_FAILURE);
         } else {
           if (dup2(in_fd, STDIN_FILENO) == -1) {
             perror("dup2");
-            close(in_fd);
+            if (close(in_fd)) {
+              perror("close");
+            }
           }
         }
       }
@@ -126,11 +173,14 @@ int exec(struct repl_ctx *current_ctx) {
                  O_WRONLY | current_ctx->out_stream_type[i] | O_CREAT, 0644);
         if (out_fd == -1) {
           perror("open");
+          exit(EXIT_FAILURE);
         } else {
           if (dup2(out_fd, STDOUT_FILENO) == -1) {
             perror("dup2");
           }
-          close(out_fd);
+          if (close(out_fd)) {
+            perror("close");
+          }
         }
       }
 
@@ -138,6 +188,26 @@ int exec(struct repl_ctx *current_ctx) {
         perror(program_name);
         exit(EXIT_FAILURE);
       }
+    }
+  }
+  if (pipe_fds) {
+    for (unsigned int i = 0; i < current_ctx->commands_count - 1; i++) {
+      if (close(pipe_fds[i][READ_END])) {
+        perror("close");
+      }
+      if (close(pipe_fds[i][WRITE_END])) {
+        perror("close");
+      }
+    }
+    free(pipe_fds);
+  }
+
+  // Wait until all child processes have exited
+  if (!current_ctx->is_background_process) {
+    for (unsigned int k = 0; k < current_ctx->commands_count; k++) {
+      do {
+        waitpid(pids[k], &status, WUNTRACED);
+      } while (!WIFEXITED(status) && !WIFSIGNALED(status));
     }
   }
   return 0;

@@ -189,8 +189,8 @@ void parse_envs(char **arg, struct user_env *user_envs,
   }
 }
 
-bool pipes_exceeded(const char *line) {
-int pipe_count = 0;
+bool pipes_exceeded(const char *line, unsigned int *commands_count) {
+  int pipe_count = 0;
   char *temp = strdup(line);
   if (!temp) {
     fprintf(stderr, "%s: strdup failed for temp", program_name);
@@ -206,14 +206,15 @@ int pipe_count = 0;
     fprintf(stderr, "%s: Maximum pipes exceeded.\n", program_name);
     return true;
   }
+  *commands_count = pipe_count + 1;
   return false;
 }
 
 char **split_on_pipes(const char *line, unsigned int *commands_count) {
-  if (pipes_exceeded(line)) {
+  if (pipes_exceeded(line, commands_count)) {
     return NULL;
-  } 
-  char **unparsed_commands = malloc(PIPES_MAX * sizeof(char *));
+  }
+  char **unparsed_commands = malloc(*commands_count * sizeof(char *));
   if (!unparsed_commands) {
     return NULL;
   }
@@ -268,7 +269,15 @@ char **tokenize_input(char *line, unsigned int *args_count) {
   token = strtok(line, delim);
 
   while (token) {
-    tokens[*args_count] = token;
+    tokens[*args_count] = strdup(token);
+    if (!tokens[*args_count]) {
+      fprintf(stderr, "strdup failed for tokens[%d]", *args_count);
+      for (unsigned int i = 0; i < *args_count; i++) {
+        free(tokens[i]);
+      }
+      free(tokens);
+      return NULL;
+    }
     (*args_count)++;
 
     if (*args_count >= (unsigned int)buffer_size) {

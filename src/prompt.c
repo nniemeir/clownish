@@ -86,8 +86,8 @@ int prompt_loop(struct repl_ctx *current_ctx) {
   }
 
   for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
-    current_ctx->commands[i] =
-        tokenize_input(current_ctx->unparsed_commands[i], &current_ctx->args_count[i]);
+    current_ctx->commands[i] = tokenize_input(current_ctx->unparsed_commands[i],
+                                              &current_ctx->args_count[i]);
     if (!current_ctx->commands[i][0]) {
       return 1;
     }
