@@ -1,4 +1,5 @@
 #include "tease.h"
+#include "context.h"
 #include "error.h"
 #include "file.h"
 
@@ -39,6 +40,18 @@ bool program_is_blacklisted(const char *program_name) {
     }
   }
   return false;
+}
+
+void handle_teasing(struct repl_ctx *current_ctx) {
+  static bool teasing_current_command = true;
+  for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
+    if (teasing_enabled && current_ctx->commands[i][0][0] != '\0') {
+      if (teasing_current_command) {
+        tease_roll(current_ctx, i);
+      }
+      teasing_current_command = !teasing_current_command;
+    }
+  }
 }
 
 void joke_binary_search(const struct joke *known_x, unsigned int array_size,

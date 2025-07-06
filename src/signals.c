@@ -1,0 +1,16 @@
+#include "signals.h"
+#include "error.h"
+
+
+void handler(int signal_num) { write(STDOUT_FILENO, "\n", 2); }
+
+int init_sig_handler() {
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_handler = handler;
+  if (sigaction(SIGINT, &sa, NULL) == -1) {
+    error_msg("Failed to configure signal handling", true);
+    return 1;
+  }
+  return 0;
+}

@@ -1,5 +1,6 @@
 #include "main.h"
 #include "config.h"
+#include "context.h"
 #include "envs.h"
 #include "error.h"
 #include "exec.h"
@@ -7,9 +8,8 @@
 #include "history.h"
 #include "parse.h"
 #include "prompt.h"
+#include "signals.h"
 #include "tease.h"
-
-void handler(int signal_num) { write(STDOUT_FILENO, "\n", 2); }
 
 void process_args(int argc, char *argv[]) {
   int c;
@@ -36,73 +36,42 @@ void process_args(int argc, char *argv[]) {
   }
 }
 
-void cleanup_ctx(struct repl_ctx *current_ctx) {
-  // Allocation of args only occurs if the string is not empty
-  if (current_ctx->input[0] != '\0') {
-    for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
-      if (current_ctx->commands[i]) {
-        for (unsigned int j = 0; j < current_ctx->args_count[i]; j++) {
-          free(current_ctx->commands[i][j]);
-        }
-        free(current_ctx->commands[i]);
-      }
-      if (current_ctx->unparsed_commands[i]) {
-        free(current_ctx->unparsed_commands[i]);
-      }
-      if (current_ctx->in_stream_name[i]) {
-        free(current_ctx->in_stream_name[i]);
-      }
-      if (current_ctx->out_stream_name[i]) {
-        free(current_ctx->out_stream_name[i]);
-      }
-    }
-    if (current_ctx->out_stream_name) {
-      free(current_ctx->out_stream_name);
-    }
-    if (current_ctx->out_stream_type) {
-      free(current_ctx->out_stream_type);
-    }
-    if (current_ctx->args_count) {
-      free(current_ctx->args_count);
-    }
-    if (current_ctx->commands) {
-      free(current_ctx->commands);
-    }
-    if (current_ctx->in_stream_name) {
-      free(current_ctx->in_stream_name);
-    }
-    if (current_ctx->in_stream_type) {
-      free(current_ctx->in_stream_type);
-    }
-    if (current_ctx->unparsed_commands) {
-      free(current_ctx->unparsed_commands);
+bool skip_execution(struct repl_ctx *current_ctx) {
+  for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
+    if (program_is_blacklisted(current_ctx->commands[i][0])) {
+      return true;
     }
   }
-  if (current_ctx->input) {
-    free(current_ctx->input);
-  }
+  return false;
 }
 
-int init_sig_handler() {
-  struct sigaction sa;
-  memset(&sa, 0, sizeof(sa));
-  sa.sa_handler = handler;
-  if (sigaction(SIGINT, &sa, NULL) == -1) {
-    error_msg("Failed to configure signal handling", true);
-    return 1;
+void repl(struct repl_ctx *current_ctx, char *hist_file) {
+  while (current_ctx->receiving) {
+    if (prompt_loop(current_ctx) == 1) {
+      cleanup_ctx(current_ctx);
+      close_history(hist_file);
+      exit(EXIT_FAILURE);
+    }
+
+    if (current_ctx->input[0] == '\0') {
+      cleanup_ctx(current_ctx);
+      continue;
+    }
+
+    if (skip_execution(current_ctx)) {
+      cleanup_ctx(current_ctx);
+      continue;
+    }
+
+    if (exec(current_ctx) == 1) {
+      cleanup_ctx(current_ctx);
+      continue;
+    }
+
+    handle_teasing(current_ctx);
+
+    cleanup_ctx(current_ctx);
   }
-  return 0;
-}
-
-void init_current_ctx(struct repl_ctx *current_ctx) {
-  current_ctx->home_dir = init_home_dir();
-  if (!current_ctx->home_dir) {
-    exit(EXIT_FAILURE);
-  }
-
-  load_config(current_ctx);
-
-  current_ctx->user = getenv_checked("USER", "Keith");
 }
 
 int main(int argc, char *argv[]) {
@@ -132,48 +101,9 @@ int main(int argc, char *argv[]) {
 
   current_ctx.receiving = 1;
   current_ctx.input = NULL;
-  bool teasing_current_command = true;
-  while (current_ctx.receiving) {
-    if (prompt_loop(&current_ctx) == 1) {
-      cleanup_ctx(&current_ctx);
-      close_history(hist_file);
-      exit(EXIT_FAILURE);
-    }
 
-    if (current_ctx.input[0] == '\0') {
-      cleanup_ctx(&current_ctx);
-      continue;
-    }
+  repl(&current_ctx, hist_file);
 
-    bool nested_continue = false;
-
-    for (unsigned int i = 0; i < current_ctx.commands_count; i++) {
-      if (program_is_blacklisted(current_ctx.commands[i][0])) {
-        cleanup_ctx(&current_ctx);
-        nested_continue = true;
-        break;
-      }
-    }
-
-    if (nested_continue) {
-      continue;
-    }
-
-    if (exec(&current_ctx) == 1) {
-      cleanup_ctx(&current_ctx);
-      continue;
-    }
-    for (unsigned int j = 0; j < current_ctx.commands_count; j++) {
-      if (teasing_enabled && current_ctx.commands[j][0][0] != '\0') {
-        if (teasing_current_command) {
-          tease_roll(&current_ctx, j);
-        }
-        teasing_current_command = !teasing_current_command;
-      }
-    }
-
-    cleanup_ctx(&current_ctx);
-  }
   close_history(hist_file);
   exit(EXIT_SUCCESS);
 }

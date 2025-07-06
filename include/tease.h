@@ -25,6 +25,7 @@ struct joke {
 
 extern int teasing_enabled;
 
+void handle_teasing(struct repl_ctx *current_ctx);
 bool program_is_blacklisted(const char *program_name);
 void tease_roll(struct repl_ctx *current_ctx, unsigned int command_index);
 void tease_desktop(void);

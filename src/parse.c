@@ -1,5 +1,6 @@
 #include "parse.h"
 #include "config.h"
+#include "context.h"
 #include "error.h"
 
 static const char *delim = " \t\r\n\a";

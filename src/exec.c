@@ -1,4 +1,5 @@
 #include "exec.h"
+#include "context.h"
 #include "error.h"
 #include "tease.h"
 #include <unistd.h>

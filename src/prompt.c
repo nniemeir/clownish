@@ -1,4 +1,5 @@
 #include "prompt.h"
+#include "context.h"
 #include "error.h"
 #include "parse.h"
 
@@ -24,30 +25,7 @@ int construct_prompt(char **prompt, char *home_dir, char *user) {
   return 0;
 }
 
-int prompt_loop(struct repl_ctx *current_ctx) {
-  char *prompt = malloc(PROMPT_MAX);
-  if (!prompt) {
-    error_msg(malloc_fail_msg, true);
-    return 1;
-  }
-
-  if (construct_prompt(&prompt, current_ctx->home_dir, current_ctx->user) ==
-      1) {
-    strcpy(prompt, "clowniSH$ ");
-  }
-
-  current_ctx->input = readline(prompt);
-  free(prompt);
-  if (!current_ctx->input || current_ctx->input[0] == '\0') {
-    return 0;
-  }
-
-  add_history(current_ctx->input);
-
-  current_ctx->commands_count = 0;
-  current_ctx->unparsed_commands =
-      split_on_pipes(current_ctx->input, &current_ctx->commands_count);
-
+int init_ctx_vars(struct repl_ctx *current_ctx) {
   current_ctx->commands = malloc(current_ctx->commands_count * sizeof(char **));
   current_ctx->args_count =
       malloc(current_ctx->commands_count * sizeof(unsigned int));
@@ -83,6 +61,37 @@ int prompt_loop(struct repl_ctx *current_ctx) {
   for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
     current_ctx->in_stream_name[i] = NULL;
     current_ctx->out_stream_name[i] = NULL;
+  }
+
+  return 0;
+}
+
+int prompt_loop(struct repl_ctx *current_ctx) {
+  char *prompt = malloc(PROMPT_MAX);
+  if (!prompt) {
+    error_msg(malloc_fail_msg, true);
+    return 1;
+  }
+
+  if (construct_prompt(&prompt, current_ctx->home_dir, current_ctx->user) ==
+      1) {
+    strcpy(prompt, "clowniSH$ ");
+  }
+
+  current_ctx->input = readline(prompt);
+  free(prompt);
+  if (!current_ctx->input || current_ctx->input[0] == '\0') {
+    return 0;
+  }
+
+  add_history(current_ctx->input);
+
+  current_ctx->commands_count = 0;
+  current_ctx->unparsed_commands =
+      split_on_pipes(current_ctx->input, &current_ctx->commands_count);
+
+  if (init_ctx_vars(current_ctx) == 1) {
+    return 1;
   }
 
   for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
