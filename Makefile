@@ -1,10 +1,31 @@
-SRC = src/config.c src/context.c src/envs.c src/error.c src/exec.c src/file.c src/history.c src/main.c src/parse.c src/prompt.c src/signals.c src/tease.c
+SRC_CORE = \
+src/config.c \
+src/context.c \
+src/envs.c \
+src/error.c \
+src/main.c \
+src/tease.c
+
+SRC_IO = \
+src/file.c \
+src/history.c \
+src/input.c
+
+SRC_EXEC = \
+src/builtins.c \
+src/exec.c \
+src/signals.c
+
+SRC_PARSE = \
+src/parse_envs.c \
+src/parse_flags.c \
+src/parse_lex.c \
+src/parse_stream.c \
+src/parse_utils.c
+
+SRC = $(SRC_CORE) $(SRC_IO) $(SRC_EXEC) $(SRC_PARSE)
 
 NAME = clownish
-
-RM = rm -f
-
-CP = cp -f -r
 
 DESTDIR = /usr/bin/
 
@@ -22,37 +43,49 @@ MANDB = mandb
 
 CC = gcc
 
-OBJS=	$(SRC:.c=.o)
+BIN_DIR = bin
+
+BUILD_DIR = build
+
+OBJS = $(SRC:src/%.c=$(BUILD_DIR)/%.o)
 
 CFLAGS = -Wall -Wextra -pedantic -g -I include
 
 LDFLAGS = -lreadline
 
-all: $(NAME)
+all: bin $(BIN_DIR)/$(NAME)
 
-$(NAME): $(OBJS)
-	$(CC) -g -o $(NAME) $(OBJS) $(CFLAGS) $(LDFLAGS)
+$(BIN_DIR)/$(NAME): $(OBJS)
+	$(CC) -o $(BIN_DIR)/$(NAME) $(OBJS) $(CFLAGS) $(LDFLAGS)
+
+$(BUILD_DIR)/%.o: src/%.c
+	@mkdir -p $(dir $@)
+	$(CC) -g $(CFLAGS) -c $< -o $@
+
+bin:
+	mkdir -p $(BIN_DIR)
 
 clean:
-	$(RM) $(OBJS)
+	rm -f $(OBJS)
+	rm -rf $(BUILD_DIR)
 
 cleanMan:
-	$(RM) $(SRCMAN)$(COMPMAN)
+	rm -f $(SRCMAN)$(COMPMAN)
 
 fclean: clean cleanMan
-	$(RM) $(NAME)
+	rm -rf $(BIN_DIR)
 
-install: $(NAME) 
-	$(CP) $(NAME) $(DESTDIR)
+install: $(BIN_DIR)/$(NAME) 
+	cp -f -r $(BIN_DIR)/$(NAME) $(DESTDIR)
 	$(COMPRESS)
-	$(CP) $(SRCMAN)$(COMPMAN) $(MANDIR)
+	cp -f -r $(SRCMAN)$(COMPMAN) $(MANDIR)
 	$(MANDB)
 
 re: fclean all
 
 uninstall: $(NAME)
-	$(RM) $(DESTDIR)$(NAME)
-	$(RM) $(MANDIR)$(COMPMAN)
+	rm -f $(DESTDIR)$(NAME)
+	rm -f $(MANDIR)$(COMPMAN)
 	$(MANDB)
 
 .PHONY: all clean cleanMan fclean install re uninstall

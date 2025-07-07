@@ -7,7 +7,7 @@
 #include "file.h"
 #include "history.h"
 #include "parse.h"
-#include "prompt.h"
+#include "input.h"
 #include "signals.h"
 #include "tease.h"
 
@@ -47,7 +47,7 @@ bool skip_execution(struct repl_ctx *current_ctx) {
 
 void repl(struct repl_ctx *current_ctx, char *hist_file) {
   while (current_ctx->receiving) {
-    if (prompt_loop(current_ctx) == 1) {
+    if (take_input(current_ctx) == 1) {
       cleanup_ctx(current_ctx);
       close_history(hist_file);
       exit(EXIT_FAILURE);
@@ -56,6 +56,12 @@ void repl(struct repl_ctx *current_ctx, char *hist_file) {
     if (current_ctx->input[0] == '\0') {
       cleanup_ctx(current_ctx);
       continue;
+    }
+
+    if (process_input(current_ctx) == 1) {
+      cleanup_ctx(current_ctx);
+      close_history(hist_file);
+      exit(EXIT_FAILURE);
     }
 
     if (skip_execution(current_ctx)) {

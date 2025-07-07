@@ -1,10 +1,10 @@
 #include "signals.h"
 #include "error.h"
 
-
 void handler(int signal_num) { write(STDOUT_FILENO, "\n", 2); }
 
 int init_sig_handler() {
+  signal(SIGCHLD, SIG_IGN);
   struct sigaction sa;
   memset(&sa, 0, sizeof(sa));
   sa.sa_handler = handler;

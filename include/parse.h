@@ -25,6 +25,6 @@ void determine_in_stream(struct repl_ctx *current_ctx, unsigned int command_inde
 void determine_out_stream(struct repl_ctx *current_ctx, unsigned int command_index);
 void parse_envs(char **arg, struct user_env *user_envs, unsigned int user_envs_count);
 char **split_on_pipes(const char *line, unsigned int *commands_count);
-char **tokenize_input(char *line, unsigned int *args_count);
+char **lex_input(char *line, unsigned int *args_count);
 
 #endif

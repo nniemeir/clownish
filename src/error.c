@@ -1,5 +1,5 @@
 #include "error.h"
-#include "prompt.h"
+#include "input.h"
 
 const char *program_name = "clowniSH";
 
@@ -14,6 +14,8 @@ const char *open_fail_msg = "Failed to open file";
 const char *close_fail_msg = "Failed to close file descriptor";
 
 const char *dup2_fail_msg = "Failed to duplicate file descriptor";
+
+const char *strdup_fail_msg = "Failed to duplicate string";
 
 const char *redirection_missing_filename_msg =
     "No filename provided for redirection";

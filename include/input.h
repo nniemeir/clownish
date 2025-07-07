@@ -1,5 +1,5 @@
-#ifndef PROMPT_H
-#define PROMPT_H
+#ifndef INPUT_H
+#define INPUT_H
 
 #include "parse.h"
 #include <linux/limits.h>
@@ -13,7 +13,9 @@
 #define WHITE "\x1b[37m"
 #define YELLOW "\x1b[33m"
 
-int construct_prompt(char **prompt, char *home_dir, char *user);
-int prompt_loop(struct repl_ctx *current_ctx);
+int take_input(struct repl_ctx *current_ctx);
+int process_input(struct repl_ctx *current_ctx);
+char *construct_prompt(char *home_dir, char *user);
+int init_repl_vars(struct repl_ctx *current_ctx);
 
 #endif

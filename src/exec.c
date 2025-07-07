@@ -1,70 +1,10 @@
 #include "exec.h"
+#include "builtins.h"
 #include "context.h"
 #include "error.h"
 #include "tease.h"
-#include <unistd.h>
 
 enum { READ_END, WRITE_END };
-
-int cat(struct repl_ctx *current_ctx) {
-  if (!teasing_enabled) {
-    return 0;
-  }
-
-  const int random_num = rand() % 101;
-  if (random_num <= 10) {
-    printf(" /\\_/\\\n");
-    printf("( o.o )\n");
-    printf(" > ^ <\n");
-    printf("You requested my presence %s?\n", current_ctx->user);
-    return 1;
-  }
-  return 0;
-}
-
-int cd(struct repl_ctx *current_ctx) {
-  if (!current_ctx->commands[0][1]) {
-    current_ctx->commands[0][1] = current_ctx->home_dir;
-  }
-
-  if (chdir(current_ctx->commands[0][1]) == -1) {
-    error_msg("Failed to change working directory", true);
-    fprintf(stderr, blame_user_msg, current_ctx->user);
-    return -1;
-  }
-
-  return 1;
-}
-
-int cler(struct repl_ctx *current_ctx) {
-  if (!teasing_enabled) {
-    return 0;
-  }
-  fprintf(stderr,
-          "Perhaps you meant to type clear but "
-          "made a typo in your haste, let's take a breather for a moment.\n");
-  sleep(10);
-  printf("Don't you feel better %s?\n", current_ctx->user);
-  return 1;
-}
-
-int exit_builtin(struct repl_ctx *current_ctx) {
-  current_ctx->receiving = 0;
-  printf("Finally giving up, %s?\n", current_ctx->user);
-  return 1;
-}
-
-int help(struct repl_ctx *current_ctx) {
-  if (!teasing_enabled) {
-    printf("cd - change directory\n");
-    printf("exit - exit shell\n");
-    printf("help - display this message\n");
-    return 1;
-  }
-  printf("You aren't seriously asking me to hold your hand, are you %s?\n",
-         current_ctx->user);
-  return 1;
-}
 
 // Returns -1 on error, 0 on no match, 1 on match
 int exec_builtin(struct repl_ctx *current_ctx) {
@@ -82,6 +22,28 @@ int exec_builtin(struct repl_ctx *current_ctx) {
   return 0;
 }
 
+int (*create_pipes(struct repl_ctx *current_ctx))[2] {
+  int(*pipe_fds)[2] =
+      malloc((current_ctx->commands_count - 1) * sizeof(int[2]));
+  if (!pipe_fds) {
+    error_msg(malloc_fail_msg, true);
+    return NULL;
+  }
+
+  for (unsigned int i = 0; i < current_ctx->commands_count - 1; i++) {
+    if (pipe(pipe_fds[i]) == -1) {
+      error_msg("Failed to create pipe", true);
+      for (unsigned int j = 0; j < i; j++) {
+        close(pipe_fds[j][READ_END]);
+        close(pipe_fds[j][WRITE_END]);
+      }
+      free(pipe_fds);
+      return NULL;
+    }
+  }
+  return pipe_fds;
+}
+
 int exec(struct repl_ctx *current_ctx) {
   const int is_builtin = exec_builtin(current_ctx);
   if (is_builtin == -1) {
@@ -94,20 +56,9 @@ int exec(struct repl_ctx *current_ctx) {
   int(*pipe_fds)[2] = NULL;
 
   if (current_ctx->commands_count > 1) {
-    pipe_fds = malloc((current_ctx->commands_count - 1) * sizeof(int[2]));
+    pipe_fds = create_pipes(current_ctx);
     if (!pipe_fds) {
-      fprintf(stderr, malloc_fail_msg, program_name);
       return 1;
-    }
-  }
-
-  if (pipe_fds) {
-    for (unsigned int i = 0; i < current_ctx->commands_count - 1; i++) {
-      if (pipe(pipe_fds[i]) == -1) {
-        error_msg("Failed to create pipe", true);
-        free(pipe_fds);
-        return 1;
-      }
     }
   }
 
