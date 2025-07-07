@@ -3,7 +3,32 @@ A cartoonishly opinionated shell. Use at your own risk.
 The views expressed by this shell are not my own, they are inspired by comments I've seen in the FOSS community that have stuck out to me.
 
 ## Dependencies
+* GCC
 * GNU readline development libraries
+* GNU make
+* gzip
+* TCL Expect (for tests)
+
+## Installation
+Compile the project
+```
+make
+```
+Test functionality (optional)
+```
+make test
+```
+Install the manpage and compiled binary
+```
+sudo make install
+```
+
+### Make Targets 
+- `make` - Compile the binary
+- `make test` – Run test suite
+- `make install` – Copy binary and manpage to system directories
+- `make clean` – Remove build objects
+- `make fclean` - Remove build objects and binary
 
 ## Shell Features
 * Executes commands via execvp
@@ -37,10 +62,14 @@ clownish [OPTIONS]
 
 ### Options
 ```
+-d			Enable debug mode (use fallback prompt and disable color override)
 -h                      Display program usage
 -p                      Enable polite mode
 -v                      Show version info
 ```
+
+## Contributing
+This project was primarily created for my education, so I am not currently accepting PRs at this time. If you'd like to fork the project, might I advise calling it libreClowniSH?
 
 ## License
 The MIT License (MIT)
