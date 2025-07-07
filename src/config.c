@@ -4,6 +4,8 @@
 #include "file.h"
 #include "parse.h"
 
+bool debug_mode = false;
+
 char *get_user_env(const char *var_name, struct user_env *user_envs,
                    unsigned int user_envs_count) {
   for (unsigned int i = 0; i < user_envs_count; i++) {

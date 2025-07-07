@@ -6,15 +6,18 @@
 #include "exec.h"
 #include "file.h"
 #include "history.h"
-#include "parse.h"
 #include "input.h"
+#include "parse.h"
 #include "signals.h"
 #include "tease.h"
 
 void process_args(int argc, char *argv[]) {
   int c;
-  while ((c = getopt(argc, argv, "hpv")) != -1) {
+  while ((c = getopt(argc, argv, "dhpv")) != -1) {
     switch (c) {
+    case 'd':
+      debug_mode = true;
+      break;
     case 'h':
       printf("Usage: clownish [options]\n");
       printf("Options:\n");

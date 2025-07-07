@@ -1,7 +1,8 @@
+#include "input.h"
+#include "config.h"
 #include "context.h"
 #include "error.h"
 #include "parse.h"
-#include "input.h"
 
 int take_input(struct repl_ctx *current_ctx) {
   char *prompt = construct_prompt(current_ctx->home_dir, current_ctx->user);
@@ -30,7 +31,7 @@ int process_input(struct repl_ctx *current_ctx) {
 
   for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
     current_ctx->commands[i] = lex_input(current_ctx->unparsed_commands[i],
-                                              &current_ctx->args_count[i]);
+                                         &current_ctx->args_count[i]);
     if (!current_ctx->commands[i] || !current_ctx->commands[i][0]) {
       return 1;
     }
@@ -54,6 +55,10 @@ char *construct_prompt(char *home_dir, char *user) {
   if (!prompt) {
     error_msg(malloc_fail_msg, true);
     return NULL;
+  }
+  if (debug_mode) {
+    snprintf(prompt, PROMPT_MAX, "%s", fallback_prompt);
+    return prompt;
   }
 
   char hostname[_SC_HOST_NAME_MAX];

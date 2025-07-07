@@ -1,0 +1,46 @@
+#!/usr/bin/expect -f
+
+log_user 0
+
+set timeout 10
+
+spawn ./bin/clownish -d -p
+
+puts "Testing Prompt"
+
+expect {
+    "clowniSH$ " {puts "Result: PASS"}
+    timeout    {puts "Result: FAIL"}
+}
+
+send "cat < test/example.txt | sort > test/example2.txt\n"
+
+send "cat test/example2.txt\n"
+
+puts "\nTesting IO Redirection and pipes"
+
+expect {
+    "such a tragedy" {}
+    timeout    {puts "Result: FAIL" && exit}
+}
+
+expect {
+    "the lone suckless shill" {}
+    timeout    {puts "Result: FAIL"}
+}
+
+expect {
+    "wastes time for window margins" {}
+    timeout    {puts "Result: FAIL"}
+}
+
+expect {
+    "clowniSH$ " {puts "Result: PASS"}
+    timeout    {puts "Result: FAIL"}
+}
+
+send "exit\n"
+
+exec sh -c "rm -rf test/example2.txt"
+
+expect eof

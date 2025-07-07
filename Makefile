@@ -75,6 +75,9 @@ cleanMan:
 fclean: clean cleanMan
 	rm -rf $(BIN_DIR)
 
+test: $(BIN_DIR)/$(NAME)
+	./test/test.exp
+
 install: $(BIN_DIR)/$(NAME) 
 	cp -f -r $(BIN_DIR)/$(NAME) $(DESTDIR)
 	$(COMPRESS)
@@ -88,4 +91,4 @@ uninstall: $(NAME)
 	rm -f $(MANDIR)$(COMPMAN)
 	$(MANDB)
 
-.PHONY: all clean cleanMan fclean install re uninstall
+.PHONY: all clean cleanMan fclean install re test uninstall
