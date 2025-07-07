@@ -21,6 +21,7 @@ void process_args(int argc, char *argv[]) {
     case 'h':
       printf("Usage: clownish [options]\n");
       printf("Options:\n");
+      printf("  -d               enable debug mode\n");
       printf("  -h               Show this help message\n");
       printf("  -p               Enable polite mode\n");
       printf("  -v               Show version info\n");
