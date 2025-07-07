@@ -63,7 +63,7 @@ int exec(struct repl_ctx *current_ctx) {
   }
 
   pid_t pids[current_ctx->commands_count];
-  int status;
+  int status = 0;
   for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
     pids[i] = fork();
     if (pids[i] == -1) {

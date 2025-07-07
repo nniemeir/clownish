@@ -1,9 +1,8 @@
 #include "error.h"
 #include "parse.h"
 
-static const char *delim = " \t\r\n\a";
-
 char **lex_input(char *line, unsigned int *args_count) {
+  static const char *delim = " \t\r\n\a";
   int buffer_size = TOKENS_MAX;
   char **tokens = malloc(buffer_size * sizeof(char *));
   if (!tokens) {
