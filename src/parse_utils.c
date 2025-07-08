@@ -20,6 +20,7 @@ void remove_arg(char **command, unsigned int *args_count,
 
   command[*args_count - 1] = NULL;
   (*args_count)--;
+
   return;
 }
 
@@ -56,6 +57,8 @@ void replace(char **original_str, const char *original_substr,
   }
 
   *dst = '\0';
+
   strcpy(*original_str, new_str);
+
   free(new_str);
 }

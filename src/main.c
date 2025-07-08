@@ -1,13 +1,10 @@
 #include "main.h"
 #include "config.h"
 #include "context.h"
-#include "envs.h"
 #include "error.h"
 #include "exec.h"
-#include "file.h"
 #include "history.h"
 #include "input.h"
-#include "parse.h"
 #include "signals.h"
 #include "tease.h"
 
@@ -27,7 +24,7 @@ void process_args(int argc, char *argv[]) {
       printf("  -v               Show version info\n");
       exit(EXIT_SUCCESS);
     case 'p':
-      teasing_enabled = 0;
+      teasing_enabled = false;
       break;
     case 'v':
       printf("clowniSH 0.231969420: Malevolent Marlin\n");
@@ -99,6 +96,7 @@ int main(int argc, char *argv[]) {
   init_current_ctx(&current_ctx);
 
   char *hist_file = init_history(current_ctx.home_dir);
+
   if (!hist_file) {
     exit(EXIT_FAILURE);
   }
@@ -115,5 +113,6 @@ int main(int argc, char *argv[]) {
   repl(&current_ctx, hist_file);
 
   close_history(hist_file);
+
   exit(EXIT_SUCCESS);
 }

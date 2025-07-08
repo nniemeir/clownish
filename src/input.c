@@ -11,17 +11,21 @@ int take_input(struct repl_ctx *current_ctx) {
   }
 
   current_ctx->input = readline(prompt);
+
   free(prompt);
+
   if (!current_ctx->input || current_ctx->input[0] == '\0') {
     return 0;
   }
 
   add_history(current_ctx->input);
+
   return 0;
 }
 
 int process_input(struct repl_ctx *current_ctx) {
   current_ctx->commands_count = 0;
+
   current_ctx->unparsed_commands =
       split_on_pipes(current_ctx->input, &current_ctx->commands_count);
 
@@ -37,7 +41,9 @@ int process_input(struct repl_ctx *current_ctx) {
     }
 
     determine_if_background(current_ctx, i);
+
     determine_in_stream(current_ctx, i);
+
     determine_out_stream(current_ctx, i);
 
     for (unsigned int j = 0; j < current_ctx->args_count[i]; j++) {
@@ -46,22 +52,26 @@ int process_input(struct repl_ctx *current_ctx) {
                  current_ctx->user_envs_count);
     }
   }
+
   return 0;
 }
 
 char *construct_prompt(char *home_dir, char *user) {
   static const char *fallback_prompt = "clowniSH$ ";
+
   char *prompt = malloc(PROMPT_MAX);
   if (!prompt) {
     error_msg(malloc_fail_msg, true);
     return NULL;
   }
+
   if (debug_mode) {
     snprintf(prompt, PROMPT_MAX, "%s", fallback_prompt);
     return prompt;
   }
 
   char hostname[_SC_HOST_NAME_MAX];
+
   if (gethostname(hostname, _SC_HOST_NAME_MAX) == -1) {
     error_msg("Failed to get hostname", true);
     snprintf(prompt, PROMPT_MAX, "%s", fallback_prompt);
@@ -69,6 +79,7 @@ char *construct_prompt(char *home_dir, char *user) {
   }
 
   char *cwd = malloc(PATH_MAX);
+
   if (!getcwd(cwd, PATH_MAX)) {
     error_msg("Failed to get current working directory", true);
     free(cwd);
@@ -92,12 +103,14 @@ int init_repl_vars(struct repl_ctx *current_ctx) {
     error_msg(malloc_fail_msg, true);
     return 1;
   }
+
   current_ctx->args_count =
       malloc(current_ctx->commands_count * sizeof(unsigned int));
   if (!current_ctx->args_count) {
     error_msg(malloc_fail_msg, true);
     return 1;
   }
+
   for (unsigned int i = 0; i < current_ctx->commands_count; i++) {
     current_ctx->args_count[i] = 0;
   }
@@ -108,18 +121,21 @@ int init_repl_vars(struct repl_ctx *current_ctx) {
     error_msg(malloc_fail_msg, true);
     return 1;
   }
+
   current_ctx->in_stream_type =
       malloc(current_ctx->commands_count * sizeof(unsigned int));
   if (!current_ctx->in_stream_type) {
     error_msg(malloc_fail_msg, true);
     return 1;
   }
+
   current_ctx->out_stream_name =
       malloc(current_ctx->commands_count * sizeof(char *));
   if (!current_ctx->out_stream_name) {
     error_msg(malloc_fail_msg, true);
     return 1;
   }
+
   current_ctx->out_stream_type =
       malloc(current_ctx->commands_count * sizeof(unsigned int));
   if (!current_ctx->out_stream_type) {

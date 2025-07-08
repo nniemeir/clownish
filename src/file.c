@@ -26,25 +26,30 @@ char *read_file(const char *file_path) {
     fclose(file);
     return NULL;
   }
+
   size_t file_size = (size_t)size;
 
   rewind(file);
 
-  char *buffer;
-  buffer = malloc(file_size + NULL_TERMINATOR_LENGTH);
+  char *buffer = malloc(file_size + NULL_TERMINATOR_LENGTH);
   if (!buffer) {
     error_msg(malloc_fail_msg, true);
     fclose(file);
     return NULL;
   }
+
   const size_t bytes_read = fread(buffer, 1, file_size, file);
+
   if (bytes_read != file_size) {
     error_msg("Failed to read from stream", true);
     free(buffer);
     fclose(file);
     return NULL;
   }
+
   fclose(file);
+
   buffer[file_size] = '\0';
+
   return buffer;
 }

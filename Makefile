@@ -3,8 +3,7 @@ src/config.c \
 src/context.c \
 src/envs.c \
 src/error.c \
-src/main.c \
-src/tease.c
+src/main.c
 
 SRC_IO = \
 src/file.c \
@@ -23,7 +22,13 @@ src/parse_lex.c \
 src/parse_stream.c \
 src/parse_utils.c
 
-SRC = $(SRC_CORE) $(SRC_IO) $(SRC_EXEC) $(SRC_PARSE)
+SRC_TEASE = \
+src/tease_jokes.c \
+src/tease_logic.c \
+src/tease_search.c \
+src/tease_targets.c
+
+SRC = $(SRC_CORE) $(SRC_IO) $(SRC_EXEC) $(SRC_PARSE) $(SRC_TEASE)
 
 NAME = clownish
 

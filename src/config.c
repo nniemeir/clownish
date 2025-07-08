@@ -2,7 +2,6 @@
 #include "context.h"
 #include "error.h"
 #include "file.h"
-#include "parse.h"
 
 bool debug_mode = false;
 
@@ -22,8 +21,10 @@ int construct_config_path(struct repl_ctx *current_ctx) {
     error_msg(malloc_fail_msg, true);
     return 1;
   }
+
   snprintf(current_ctx->config_filename, PATH_MAX, "%s/.clownrc",
            current_ctx->home_dir);
+
   return 0;
 }
 
@@ -38,6 +39,7 @@ int count_user_envs(struct repl_ctx *current_ctx, char *config_file_contents) {
   if (current_ctx->user_envs_count == 0) {
     return 1;
   }
+
   return 0;
 }
 
@@ -46,20 +48,22 @@ void cleanup_user_envs(struct repl_ctx *current_ctx, unsigned int i) {
     if (current_ctx->user_envs[j].name) {
       free(current_ctx->user_envs[j].name);
     }
+
     if (current_ctx->user_envs[j].value) {
       free(current_ctx->user_envs[j].value);
     }
   }
+
   if (current_ctx->user_envs) {
     free(current_ctx->user_envs);
   }
+
   current_ctx->user_envs = NULL;
 }
 
 int parse_user_envs(struct repl_ctx *current_ctx, char *config_file_contents) {
   current_ctx->user_envs =
       malloc(current_ctx->user_envs_count * sizeof(struct user_env));
-
   if (!current_ctx->user_envs) {
     error_msg(malloc_fail_msg, true);
     return 1;
@@ -70,6 +74,7 @@ int parse_user_envs(struct repl_ctx *current_ctx, char *config_file_contents) {
 
   while (current_line && i < current_ctx->user_envs_count) {
     char *equal_sign = strchr(current_line, '=');
+
     if (!equal_sign) {
       current_line = strtok(NULL, "\n");
       continue;
@@ -84,24 +89,29 @@ int parse_user_envs(struct repl_ctx *current_ctx, char *config_file_contents) {
     size_t value_len = strlen(equal_sign + 1);
 
     current_ctx->user_envs[i].name = malloc(name_len + 1);
+
     if (!current_ctx->user_envs[i].name) {
       cleanup_user_envs(current_ctx, i);
       error_msg(malloc_fail_msg, true);
       return 1;
     }
+
     current_ctx->user_envs[i].value = malloc(value_len + 1);
     if (!current_ctx->user_envs[i].value) {
       error_msg(malloc_fail_msg, true);
       cleanup_user_envs(current_ctx, i);
       return 1;
     }
+
     strncpy(current_ctx->user_envs[i].name, current_line, name_len);
     current_ctx->user_envs[i].name[name_len] = '\0';
+
     strcpy(current_ctx->user_envs[i].value, equal_sign + 1);
 
     i++;
     current_line = strtok(NULL, "\n");
   }
+
   return 0;
 }
 
@@ -130,5 +140,6 @@ int load_config(struct repl_ctx *current_ctx) {
   }
 
   free(config_file_contents);
+
   return 0;
 }

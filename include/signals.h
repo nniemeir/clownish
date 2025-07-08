@@ -8,6 +8,6 @@
 #include <unistd.h>
 
 void handler(int signal_num);
-int init_sig_handler();
+int init_sig_handler(void);
 
 #endif

@@ -26,5 +26,6 @@ void error_msg(const char *context, bool report_errno) {
             strerror(errno), CYAN);
     return;
   }
+
   fprintf(stderr, "%s%s: %s %s\n", RED, program_name, context, CYAN);
 }
