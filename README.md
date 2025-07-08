@@ -2,6 +2,9 @@
 A cartoonishly opinionated shell. Use at your own risk.
 The views expressed by this shell are not my own, they are inspired by comments I've seen in the FOSS community that have stuck out to me.
 
+## Demo
+![clowniSH demonstration](assets/demo.gif)
+
 ## Dependencies
 * GCC
 * GNU readline development libraries
