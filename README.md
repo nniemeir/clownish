@@ -75,6 +75,6 @@ clownish [OPTIONS]
 This project was primarily created for my education, so I am not currently accepting PRs at this time. If you'd like to fork the project, might I advise calling it libreClowniSH?
 
 ## License
-The MIT License (MIT)
+GNU General Public License V2
 
 Copyright (c) 2025 Jacob Niemeir
