@@ -1,7 +1,9 @@
 #include "signals.h"
 #include "error.h"
 
-void handler(int signal_num) { write(STDOUT_FILENO, "\n", 2); }
+void handler(int signal_num) { 
+  (void)signal_num;
+  write(STDOUT_FILENO, "\n", 2); }
 
 int init_sig_handler(void) {
   signal(SIGCHLD, SIG_IGN);
