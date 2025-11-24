@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "envs.h"
 #include "error.h"
 

@@ -1,4 +1,5 @@
-#include "context.h"
+#include <stdlib.h>
+
 #include "tease.h"
 
 bool teasing_enabled = true;

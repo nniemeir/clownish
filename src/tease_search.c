@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <string.h>
+
 #include "tease.h"
 
 void joke_binary_search(const struct joke *known_x, unsigned int array_size,

@@ -1,7 +1,6 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include <errno.h>
 #include <stdbool.h>
 
 #define ERR_MSG_MAX 2048

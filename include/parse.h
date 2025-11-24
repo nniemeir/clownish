@@ -1,13 +1,6 @@
 #ifndef PARSE_H
 #define PARSE_H
 
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <linux/limits.h>
-#include <readline/readline.h>
 #include "context.h"
 
 #define NULL_TERMINATOR_LENGTH 1

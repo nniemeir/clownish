@@ -1,6 +1,11 @@
-#include "history.h"
+#include <linux/limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <readline/history.h>
+
 #include "error.h"
 #include "file.h"
+#include "history.h"
 
 char *init_history(char *home_dir) {
   char *hist_file = malloc(PATH_MAX);

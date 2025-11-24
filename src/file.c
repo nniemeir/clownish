@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+
 #include "file.h"
 #include "error.h"
 #include "parse.h"

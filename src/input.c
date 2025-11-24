@@ -1,7 +1,13 @@
-#include "input.h"
+#include <linux/limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <readline/history.h>
+#include <readline/readline.h>
+
 #include "config.h"
-#include "context.h"
 #include "error.h"
+#include "input.h"
 #include "parse.h"
 
 int take_input(struct repl_ctx *current_ctx) {

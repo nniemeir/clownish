@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "builtins.h"
 #include "error.h"
 #include "tease.h"

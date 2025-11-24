@@ -1,14 +1,7 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-#include "parse.h"
-#include <fcntl.h>
-#include <linux/limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <wait.h>
+#include "context.h"
 
 #define NUM_OF_BUILTINS 5
 

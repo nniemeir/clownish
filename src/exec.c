@@ -1,7 +1,12 @@
-#include "exec.h"
+#include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 #include "builtins.h"
-#include "context.h"
 #include "error.h"
+#include "exec.h"
 
 enum { READ_END, WRITE_END };
 

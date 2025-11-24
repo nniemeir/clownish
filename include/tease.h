@@ -1,12 +1,9 @@
 #ifndef TEASE_H
 #define TEASE_H
 
-#include "parse.h"
 #include "stdbool.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/utsname.h>
+
+#include "context.h"
 
 #define NUM_OF_BLACKLISTED_PROGRAMS 3
 #define NUM_OF_KNOWN_DESKTOPS 58

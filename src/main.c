@@ -1,6 +1,9 @@
-#include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
 #include "config.h"
-#include "context.h"
 #include "error.h"
 #include "exec.h"
 #include "history.h"

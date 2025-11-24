@@ -1,12 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "parse.h"
-#include <linux/limits.h>
-#include <readline/history.h>
-#include <readline/readline.h>
-#include <stdio.h>
-#include <unistd.h>
+#include "context.h"
 
 #define CYAN "\033[36m"
 #define RED "\x1b[31m"

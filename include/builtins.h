@@ -1,9 +1,6 @@
 #ifndef BUILTINS_H
 #define BUILTINS_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
 #include "context.h"
 
 int cat(struct repl_ctx *current_ctx);
