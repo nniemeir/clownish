@@ -1,6 +1,17 @@
+/**
+ * tease_jokes.c
+ *
+ * This is where all the yuks live. Binary search is used for searching these
+ * arrays, so THEY MUST BE KEPT SORTED.
+ */
+
 #include "tease.h"
 
-// TO DO - Confirm XDG_CURRENT_DESKTOP values for each of these
+/*
+ * The name of the host's desktop (meaning Desktop Environment or standalone
+ * Window Manager) is determined by reading the XDG_CURRENT_DESKTOP environment
+ * variable.
+ */
 const struct joke known_desktops[NUM_OF_KNOWN_DESKTOPS] = {
     {"2bwm", "2bwm? How many times have you had to recompile it today?"},
     {"9wm", "9wm? Looks like Plan 9 while actually being useful."},
@@ -64,6 +75,10 @@ const struct joke known_desktops[NUM_OF_KNOWN_DESKTOPS] = {
     {"xmonad", "Did you learn a whole programming language just to configure "
                "your WM?"}};
 
+/*
+ * The name of the host's distribution is determined by reading the first line
+ * of the file /etc/os-release.
+ */
 const struct joke known_distros[NUM_OF_KNOWN_DISTROS] = {
     {"AlmaLinux", "AlmaLinux? Too cheap for a RHEL license?"},
     {"Alpine Linux", "Was Arch not minimal enough for you?"},
@@ -146,6 +161,7 @@ const struct joke known_distros[NUM_OF_KNOWN_DISTROS] = {
              "Suckless-shilling, crypto-mining, Void user."},
     {"Zorin OS", "Zorin? Were the extra layout options worth the money?"}};
 
+/* Program names are fetched from the first element of each command array */
 const struct joke known_programs[NUM_OF_KNOWN_PROGRAMS] = {
     {"audacity", "At least someone is listening to your recordings."},
     {"bleachbit", "Pray that your email server isn't being audited."},
@@ -196,6 +212,10 @@ const struct joke known_programs[NUM_OF_KNOWN_PROGRAMS] = {
     {"zenmap", "Is the CLI too hard for you?"},
     {"zoom", "You might as well just livestream your webcam to the internet."}};
 
+/*
+ * Terminal name is currently determined by reading the TERM environment
+ * variable, though many terminals have the same value for it.
+ */
 const struct joke known_terminals[NUM_OF_KNOWN_TERMINALS] = {
     {"st-256color", "An st user? You must be fun at parties."},
     {"xterm-kitty", "AN UPDATE FOR KITTY IS AVAILABLE."}};
